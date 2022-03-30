@@ -7,14 +7,18 @@
 
 clear all, close all
 
+% define filepaths
+master_config = yaml.loadFile("master_config.yml")
+addpath(genpath(master_config.code_directory))
+
 % Define some file/folder locations
 addpath(fullfile('..','general'));
 
 % Location of intermediate processed data
-proc_dir = fullfile('..','..','data','processed');
+proc_dir = fullfile(master_config.data_directory,'processed');
 
 % Location to save section files
-dir_out = fullfile('..','..','data','sections');
+dir_out = fullfile(master_config.data_directory,,'sections');
 
 % Get survey metadata
 surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
