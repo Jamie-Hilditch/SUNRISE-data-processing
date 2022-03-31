@@ -71,7 +71,7 @@ for s = 1:length(surveys)
     uhdas = dir(fullfile(proc_dir,'adcp_ship','*.mat'));
 
     % Clear any existing loaded adcp data
-    clear adcp
+    adcp = {};
     nadcp = 0;
 
     % Load each file temporarily and insert its structures into the new adcp
@@ -101,6 +101,8 @@ for s = 1:length(surveys)
         vmp(i) = tmp.vmp_combo;
         clear tmp;
     end
+    if length(vmp_files) == 0, vmp = struct([]), end
+
     % Assign vessel numbers and output structure names to each VMP dataset
     for i = 1:length(vmp)
         % These files are named something like: SUNRISE2021_PE_combo.mat.
@@ -118,6 +120,8 @@ for s = 1:length(surveys)
         ctd(i) = tmp.CTD_combo;
         clear tmp;
     end
+    if length(ctd_files) == 0, ctd = struct([]), end
+
     % Assign vessel numbers and output structure names to each CTD dataset
     for i = 1:length(ctd)
         % These files are named something like: SUNRISE2021_PE_combo.mat.
@@ -129,12 +133,14 @@ for s = 1:length(surveys)
 
     % ----------- Combined CTD & VMP (hydro) data ----------- %
     hydro_files = dir(fullfile(proc_dir,'combined_hydro','SUNRISE2021_*_hydro_combo.mat'));
-    clear hydro
+    clear hydro;
     for i = 1:length(hydro_files)
         tmp = load(fullfile(hydro_files(i).folder,hydro_files(i).name));
         hydro(i) = tmp.hydro_combo;
         clear tmp;
     end
+    if length(hydro_files) == 0, hydro = struct([]), end
+
     % Assign vessel numbers and output structure names to each hydro dataset
     for i = 1:length(hydro)
         % These files are named something like: SUNRISE2021_PE_combo.mat.
