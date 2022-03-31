@@ -356,6 +356,9 @@ for s = 1:length(surveys)
                     end
                 end
             end
+            % Add entry into the summary table
+            summary(i,{append('HYDRO ',hydro(v).name)}) = {sum(idx)};
+
         end
 
         %% Intermediate data organized by deployments (TChains, RHIB ADCP)
