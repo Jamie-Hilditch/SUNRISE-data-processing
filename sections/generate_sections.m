@@ -22,8 +22,22 @@ dir_out = fullfile(master_config.data_directory,'sections');
 % Get survey metadata
 surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
 
+% ****** FIX ME ****** %
+% Move these flags into a section config file
+% And allow for different behaviour between ships?
+% ******************** %
+
 % Overwrite existing section files?
 overwrite_sections = true;
+
+% Use ctd files?
+use_ctd_files = false;
+
+% Use vmp files?
+use_vmp_files = false;
+
+% Use hydro files?
+use_hydro_files = true;
 
 % Turn off a warning when filling tables, the default fill is 0 which is exactly what we want
 warning('off','MATLAB:table:RowsAddedExistingVars');
@@ -94,14 +108,19 @@ for s = 1:length(surveys)
     end
 
     % ----------- VMP data ----------- %
-    vmp_files = dir(fullfile(proc_dir,'VMP','SUNRISE2021_*_combo.mat'));
+    if use_vmp_files
+    	vmp_files = dir(fullfile(proc_dir,'VMP','SUNRISE2021_*_combo.mat'));
+    else
+	vmp_files = struct([]);
+    end
+
     clear vmp
     for i = 1:length(vmp_files)
         tmp = load(fullfile(vmp_files(i).folder,vmp_files(i).name));
         vmp(i) = tmp.vmp_combo;
         clear tmp;
     end
-    if length(vmp_files) == 0, vmp = struct([]), end
+    if length(vmp_files) == 0, vmp = struct([]);, end
 
     % Assign vessel numbers and output structure names to each VMP dataset
     for i = 1:length(vmp)
@@ -113,14 +132,19 @@ for s = 1:length(surveys)
     end
 
     % ----------- CTD data ----------- %
-    ctd_files = dir(fullfile(proc_dir,'CTD','SUNRISE2021_*_CTD_combo.mat'));
+    if use_ctd_files
+    	ctd_files = dir(fullfile(proc_dir,'CTD','SUNRISE2021_*_CTD_combo.mat'));
+    else
+	ctd_files = struct([]);
+    end
+
     clear ctd
     for i = 1:length(ctd_files)
         tmp = load(fullfile(ctd_files(i).folder,ctd_files(i).name));
         ctd(i) = tmp.CTD_combo;
         clear tmp;
     end
-    if length(ctd_files) == 0, ctd = struct([]), end
+    if length(ctd_files) == 0, ctd = struct([]);, end
 
     % Assign vessel numbers and output structure names to each CTD dataset
     for i = 1:length(ctd)
@@ -132,14 +156,19 @@ for s = 1:length(surveys)
     end
 
     % ----------- Combined CTD & VMP (hydro) data ----------- %
-    hydro_files = dir(fullfile(proc_dir,'combined_hydro','SUNRISE2021_*_hydro_combo.mat'));
+    if use_hydro_files
+    	hydro_files = dir(fullfile(proc_dir,'combined_hydro','SUNRISE2021_*_hydro_combo.mat'));
+    else
+	hydro_files = struct([]);
+    end 
+
     clear hydro;
     for i = 1:length(hydro_files)
         tmp = load(fullfile(hydro_files(i).folder,hydro_files(i).name));
         hydro(i) = tmp.hydro_combo;
         clear tmp;
     end
-    if length(hydro_files) == 0, hydro = struct([]), end
+    if length(hydro_files) == 0, hydro = struct([]);, end
 
     % Assign vessel numbers and output structure names to each hydro dataset
     for i = 1:length(hydro)
