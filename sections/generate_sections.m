@@ -9,10 +9,6 @@ clear all, close all
 
 % define filepaths
 master_config = yaml.loadFile("../master_config.yml")
-addpath(genpath(master_config.code_directory))
-
-% Define some file/folder locations
-addpath(fullfile('..','general'));
 
 % Location of intermediate processed data
 proc_dir = fullfile(master_config.data_directory,'processed');
