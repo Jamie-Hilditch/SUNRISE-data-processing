@@ -121,6 +121,23 @@ for s = 1:length(surveys)
         ctd(i).name = [vessels(ctd(i).vnum).shortname];
     end
 
+    % ----------- Combined CTD & VMP (hydro) data ----------- %
+    hydro_files = dir(fullfile(proc_dir,'combined_hydro','SUNRISE2021_*_hydro_combo.mat'));
+    clear hydro
+    for i = 1:length(hydro_files)
+        tmp = load(fullfile(hydro_files(i).folder,hydro_files(i).name));
+        hydro(i) = tmp.hydro_combo;
+        clear tmp;
+    end
+    % Assign vessel numbers and output structure names to each hydro dataset
+    for i = 1:length(hydro)
+        % These files are named something like: SUNRISE2021_PE_combo.mat.
+        % Extract the short vessel name and find the matching entry in the 'vessels' structure.
+        str_parts = strsplit(hydro_files(i).name,'_');
+        hydro(i).vnum = find(strcmp(lower({vessels.shortname}), lower(str_parts{2})));
+        hydro(i).name = [vessels(hydro(i).vnum).shortname];
+    end
+
     %% Prepare to load multi-file data sources
     % The T-chain and RHIB ADCP data files are larger and organized by
     % deployment. To avoid loading everything at once, load the time vectors
@@ -295,6 +312,27 @@ for s = 1:length(surveys)
             end
         end
 
+        %% Combined hydro data
+        for v = 1:length(hydro)
+            % Check if this CTD structure contains any data during the section
+            idx = hydro(v).dn >= sec_start(i,hydro(v).vnum) & ...
+                  hydro(v).dn <= sec_end(i,hydro(v).vnum);
+
+            % If it does, extract the indices contained in the section.
+            if sum(idx)>0
+                fprintf('   ├── Combined Hydro in section: %s\n',hydro(v).name);
+                flds = setdiff(fields(hydro(v)),{'name','vnum'});
+                for f = 1:length(flds)
+                    % Variables with a time dimension get indexed and stored
+                    if size(hydro(v).(flds{f}),2) == length(idx)
+                        section.hydro.(hydro(v).name).(flds{f}) = hydro(v).(flds{f})(:,idx);
+                    else
+                        % Variables with no time dimension (e.g. depth) get stored
+                        section.hydro.(hydro(v).name).(flds{f}) = hydro(v).(flds{f});
+                    end
+                end
+            end
+        end
 
         %% Intermediate data organized by deployments (TChains, RHIB ADCP)
         for ii = 1:length(insts)
