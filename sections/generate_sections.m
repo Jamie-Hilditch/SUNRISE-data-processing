@@ -11,7 +11,7 @@ clear all, close all
 addpath(genpath('../utils'))
 
 % define filepaths
-master_config = yaml.loadFile("../master_config.yml")
+master_config = yaml.loadFile("../master_config.yml");
 
 % Location of intermediate processed data
 proc_dir = fullfile(master_config.data_directory,'processed');
@@ -24,6 +24,9 @@ surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
 
 % Overwrite existing section files?
 overwrite_sections = true;
+
+% Turn off a warning when filling tables, the default fill is 0 which is exactly what we want
+warning('off','MATLAB:table:RowsAddedExistingVars');
 
 % Define vessel names & short names. This struct is used to assign vessel
 % numbers and index by vessel.
@@ -236,11 +239,18 @@ for s = 1:length(surveys)
     % satisfy any desired naming conventions. I simply took existing
     % intermediate data and indexed by time while preserving variable names.
     %========================================================================
+    
+    % Define a table to hold summary information
+    % Save the number of time indices for each instrument
+    summary = table;
 
     for i = 1:max(secs.n)
         section = struct();
 
         fprintf('├── Section %d\n',i);
+        
+        % Record section number
+        summary(i,{'Section Number'}) = {i};
 
         %% UHDAS ADCP data
         for a = 1:length(adcp)
@@ -268,6 +278,10 @@ for s = 1:length(surveys)
                         section.adcp.(adcp{a}.name).(flds{f}) = adcp{a}.(flds{f});
                     end
                 end
+
+            % Add an entry into the summary table
+            summary(i,{append('ADCP ',adcp{a}.name)}) = {sum(idx)};
+
             end
         end
 
@@ -291,6 +305,10 @@ for s = 1:length(surveys)
                     end
                 end
             end
+
+	    % Add entry into the summary table
+            summary(i,{append('VMP ',vmp(v).name)}) = {sum(idx)};
+
         end
 
         %% CTD data
@@ -313,6 +331,9 @@ for s = 1:length(surveys)
                     end
                 end
             end
+            % Add entry into the summary table
+            summary(i,{append('CTD ',ctd(v).name)}) = {sum(idx)};
+
         end
 
         %% Combined hydro data
@@ -335,6 +356,9 @@ for s = 1:length(surveys)
                     end
                 end
             end
+            % Add entry into the summary table
+            summary(i,{append('HYDRO ',hydro(v).name)}) = {sum(idx)};
+
         end
 
         %% Intermediate data organized by deployments (TChains, RHIB ADCP)
@@ -378,6 +402,9 @@ for s = 1:length(surveys)
                             section.adcp.(name).u     = squeeze(dat(insts{ii}).vel(:,1,idx));
                             section.adcp.(name).v     = squeeze(dat(insts{ii}).vel(:,2,idx));
                             section.adcp.(name).w     = squeeze(dat(insts{ii}).vel(:,3,idx));
+                   
+                            % Add entry into the summary table
+                            summary(i,{append('ADCP ',name)}) = {sum(idx)};
                         end
 
                       case 'tchain'
@@ -394,7 +421,11 @@ for s = 1:length(surveys)
                             section.tchain.(name).p   = dat(insts{ii}).p(:,idx);
                             section.tchain.(name).s   = dat(insts{ii}).s(:,idx);
                             section.tchain.(name).pos = dat(insts{ii}).pos;
+      
+                            % Add entry into summary table
+                            summary(i,{append('TCHAIN ',name)}) = {sum(idx)};
                         end
+
                     end % convert data
 
                 end % if data exists
@@ -408,8 +439,12 @@ for s = 1:length(surveys)
         % Save output
         file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,i);
         save(fullfile(dir_out,file_name),'-struct','section');
-
         disp(['Saved ' file_name]);
 
     end % loop over sections
+    
+    % save summary file
+    summary_file_name = sprintf('SUNRISE_2021_survey_%02d_summary.csv',s);
+    writetable(summary,fullfile(dir_out,summary_file_name));
+
 end
