@@ -7,6 +7,9 @@
 
 clear all, close all
 
+% Add yaml (and other utility) code to path
+addpath(genpath('../utils'))
+
 % define filepaths
 master_config = yaml.loadFile("../master_config.yml")
 
