@@ -1,7 +1,8 @@
 clear all, close all
 
 % Locate survey metadata files
-dir_in = '../../data/intermediate/survey_metadata';
+master_config = yaml.loadFile("master_config.yml")
+dir_in = fullfile(master_config.data_directory,'intermediate/survey_metadata');
 file_out = '../../section_status.xlsx';
 survey_files = dir(fullfile(dir_in,'survey*.csv'));
 
