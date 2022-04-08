@@ -55,6 +55,7 @@ PE_TChain = Tchain('TCHAIN_Pelican',fullfile(Tchain_directory,'Pelican'));
 
 % create the Pelican Vessel class
 Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_TChain);
+fprintf("Setup Pelican Instruments\n")
 
 % setup the Walton Smith Instruments
 % setup the Walton Smith ADCPs
@@ -69,6 +70,7 @@ WS_TChain = Tchain('TCHAIN_Walton_Smith',fullfile(Tchain_directory,'Walton_Smith
 
 % create WS Vessel Class
 Walton_Smith = Vessel(WS_1200,WS_600,WS_600_no2,WS_VMP,WS_TChain);
+fprintf("Setup Walton Smith Instruments\n")
 
 % setup the rhib instuments
 % adcps first
@@ -80,10 +82,14 @@ Aries_TChain = Tchain('TCHAIN_Aries',fullfile(Tchain_directory,'Aries'));
 
 % create Vessel Classes for the two rhibs
 Polly = Vessel(ADCP_Polly,Polly_TChain);
+fprintf("Setup Polly Instruments\n")
 Aries = Vessel(ADCP_Aries,Aries_TChain);
+fprintf("Setup Aries Instruments\n")
 
 % now we loop over surveys
 for s = 1:length(surveys)
+
+  fprintf("├──Beginning survey %d\n",s)
 
   % load in survey sections metadata
   sections = readtable(fullfile(surveys(s).folder,surveys(s).name));
@@ -96,6 +102,8 @@ for s = 1:length(surveys)
 
   % now loop through different sections
   for n = section_numbers
+
+    fprintf('  ├── Section %d\n',n);
 
     % get the relevant rows of the table
     this_section = sections(sections.n == n,:);
@@ -121,6 +129,8 @@ for s = 1:length(surveys)
     file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,i);
     save(fullfile(directory,filename),'-struct','section_data','-v7.3')
 
+    fprintf('    ├── Saved section to %s\n',file_name);
+
     % add entry into summary file
     % Record section number
     summary(n,{'Section Number'}) = {n};
@@ -128,12 +138,13 @@ for s = 1:length(surveys)
       summary(n,field) = 1;
     end
 
+
   end
 
   % save summary file
   directory = fullfile(dir_out,sprintf('survey_%02d'));
   summary_file_name = sprintf('SUNRISE_2021_survey_%02d_summary.csv',s);
   writetable(summary,fullfile(directory,summary_file_name));
+  fprintf('  ├── Saved survey summary to %s\n',summary_file_name);
 
 end
-

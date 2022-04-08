@@ -6,7 +6,7 @@ classdef ADCP_Rhib < Instrument
     %   name: string (default="") - the name of the instrument
     %   data_directory: (default=string.empty) - filepath to the
     %                                            deployments directory
-    %   variables: string (default=string.empty) - string array containing 
+    %   variables: string (default=string.empty) - string array containing
     %                           the name of the instrument variables to be
     %                           loaded. If empty all variables should be
     %                           loaded.
@@ -21,7 +21,7 @@ classdef ADCP_Rhib < Instrument
     %
     % Methods:
     %   get_data(obj,start,stop): Get data struct containing fields defined
-    %                             in variables between two datetimes 
+    %                             in variables between two datetimes
 
     properties
         data_source
@@ -34,14 +34,14 @@ classdef ADCP_Rhib < Instrument
     properties (Access = protected)
         % seperate the variables by different types of indexing
         % variable_aliases are defined by static methods
-        variable_aliases = {"u","v","w","depth","z","dn"} %#ok<*CLARRSTR> 
+        variable_aliases = {"u","v","w","depth","z","dn"} %#ok<*CLARRSTR>
         no_time_dims = {"config","cell_depth"}
         time_other = {"ahrs_gyro","computed_heading","vessel_u","vessel_v"}
         other_time = {"time","heading","pitch","roll","nuc_time","bt_range",...
                         "bt_range","bt_vel","bt_time","vessel_heading",...
                         "vessel_lat","vessel_lon"}
         other_other_time = {"vel","echo_intens","corr","ahrs_rotm"}
-    end    
+    end
 
     methods
         function obj = ADCP_Rhib(name,data_directory,variables)
@@ -72,7 +72,7 @@ classdef ADCP_Rhib < Instrument
 
         function data = get_data(obj,start,stop)
             % get data between start and stop
-            % Retrieve data from the data_file between the start and stop 
+            % Retrieve data from the data_file between the start and stop
             % times. The variables included are defined by the variables
             % property and if this is empty all variables are included.
             %
@@ -89,7 +89,7 @@ classdef ADCP_Rhib < Instrument
                 start datetime
                 stop datetime
             end
-            
+
             % first find the correct deployment(s)
             deploy_idx = find([obj.deployments(:).start_time] <= datenum(stop) & ...
                 [obj.deployments(:).end_time] >= datenum(start));
@@ -153,22 +153,22 @@ classdef ADCP_Rhib < Instrument
 
                         case obj.other_other_time
                             data{i}.(var) = deployment.(char(var))(:,:,nidx);
-                        
+
                         otherwise
                             % unexpected variable
                             % may need to add to the static properties
                             % above
                             tmp = deployment.(var);
-                            
+
                             % if not numeric save everything
                             if ~isnumeric(tmp); data{i}.(var) = tmp; continue; end
 
                             % if numeric try and find the time dimension
                             t_idx = find(size(tmp) == length(idx));
-                            
+
                             % deal with the case of no time dimension
                             if isempty(t_idx);  data{i}.(var) = tmp; continue; end
-                            
+
                             % index into time dimension
                             data{i}.(var) = subsasgn(tmp, ...
                                 struct('type','()','subs',{ ...
@@ -176,16 +176,18 @@ classdef ADCP_Rhib < Instrument
                                 idx,...
                                 repmat({':'},1,ndims(shifted)-t_idx(1))] ...
                                 }),[]);
-                            
+
                     end
-                    
+
                 end
+                % print a message for each deployment
+                fprintf('    ├── %s\n',obj.name)
             end
 
         end
 
     end
-    
+
     methods (Static = true, Access = protected)
         function out = u(deployment,nidx)
             out = squeeze(deployment.vel(:,1,nidx));

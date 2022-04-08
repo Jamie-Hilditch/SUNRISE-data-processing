@@ -6,7 +6,7 @@ classdef Tchain < Instrument
     %   name: string (default="") - the name of the instrument
     %   data_directory: (default=string.empty) - filepath to the
     %                                            deployments directory
-    %   variables: string (default=string.empty) - string array containing 
+    %   variables: string (default=string.empty) - string array containing
     %                           the name of the instrument variables to be
     %                           loaded. If empty all variables should be
     %                           loaded.
@@ -21,7 +21,7 @@ classdef Tchain < Instrument
     %
     % Methods:
     %   get_data(obj,start,stop): Get data struct containing fields defined
-    %                             in variables between two datetimes 
+    %                             in variables between two datetimes
 
     properties
         data_source
@@ -61,7 +61,7 @@ classdef Tchain < Instrument
 
         function data = get_data(obj,start,stop)
             % get data between start and stop
-            % Retrieve data from the data_file between the start and stop 
+            % Retrieve data from the data_file between the start and stop
             % times. The variables included are defined by the variables
             % property and if this is empty all variables are included.
             %
@@ -78,7 +78,7 @@ classdef Tchain < Instrument
                 start datetime
                 stop datetime
             end
-            
+
             % first find the correct deployment(s)
             deploy_idx = find([obj.deployments(:).start_time] <= datenum(stop) & ...
                 [obj.deployments(:).end_time] >= datenum(start));
@@ -130,17 +130,19 @@ classdef Tchain < Instrument
 
                         case "pos"
                             data{i}.pos = deployment.pos;
-                        
+
                         otherwise
                             data{i}.(var) = deployment.(char(var))(:,nidx);
-                            
-                    end  
-                    
+
+                    end
+
                 end
+                % print a message for each deployment
+                fprintf('    ├── %s\n',obj.name)
             end
 
         end
 
     end
-    
+
 end

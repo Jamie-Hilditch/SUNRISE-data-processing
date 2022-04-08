@@ -5,7 +5,7 @@ classdef VMP_Combo < Instrument
     % Constructor Arguments
     %   name: string (default="") - the name of the instrument
     %   data_file: (default=string.empty) - filepath to the vmp combo file
-    %   variables: string (default=string.empty) - string array containing 
+    %   variables: string (default=string.empty) - string array containing
     %                           the name of the instrument variables to be
     %                           loaded. If empty all variables should be
     %                           loaded.
@@ -18,10 +18,10 @@ classdef VMP_Combo < Instrument
     %
     % Methods:
     %   get_data(obj,start,stop): Get data struct containing fields defined
-    %                             in variables between two datetimes 
+    %                             in variables between two datetimes
 
     properties
-        data_source 
+        data_source
     end
 
     methods
@@ -39,7 +39,7 @@ classdef VMP_Combo < Instrument
 
         function data = get_data(obj,start,stop)
             % get data between start and stop
-            % Retrieve data from the data_file between the start and stop 
+            % Retrieve data from the data_file between the start and stop
             % times. The variables included are defined by the variables
             % property and if this is empty all variables are included.
             %
@@ -56,7 +56,7 @@ classdef VMP_Combo < Instrument
                 start datetime
                 stop datetime
             end
-            
+
             %%%%%%%%%%
             % FIX ME %
             %%%%%%%%%%
@@ -79,7 +79,7 @@ classdef VMP_Combo < Instrument
 
             % Return if no datapoints
             if sum(idx) == 0; data = struct([]); return; end
-            
+
             % loop through variables saving each to the output structure
             for var = variables
 
@@ -93,7 +93,7 @@ classdef VMP_Combo < Instrument
                 % dimension as the second dimension except depth and
                 % u_star_cint
                 switch var
-                   
+
                     case "depth"
                         data.depth = vmp_data.depth;
 
@@ -103,7 +103,10 @@ classdef VMP_Combo < Instrument
                     otherwise
                         data.(var) = vmp_data.(var)(:,idx);
                 end
-            end     
+            end
+
+            % print a message
+            fprintf('    ├── %s\n',obj.name)     
         end
     end
 end

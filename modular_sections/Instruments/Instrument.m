@@ -3,7 +3,7 @@ classdef (Abstract) Instrument
     %
     % Constructor Arguments:
     %   name: string (default="") - the name of the instrument
-    %   variables: string (default=string.empty) - string array containing 
+    %   variables: string (default=string.empty) - string array containing
     %                           the name of the instrument variables to be
     %                           loaded. If empty all variables should be
     %                           loaded.
@@ -17,9 +17,9 @@ classdef (Abstract) Instrument
     %
     %
     % Abstract Methods:
-    %   get_data(obj,start,stop): Get data struct or cell of structs 
+    %   get_data(obj,start,stop): Get data struct or cell of structs
     %                             containing the variables defined
-    %                             by variables between two datetimes 
+    %                             by variables between two datetimes
 
     properties
         name string

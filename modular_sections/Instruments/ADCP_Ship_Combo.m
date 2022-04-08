@@ -1,6 +1,6 @@
 classdef ADCP_Ship_Combo < Instrument
     % Shipboard ADCP from combined file
-    % The combined file contains all the ADCPs from a single ship and 
+    % The combined file contains all the ADCPs from a single ship and
     % therefore we require the ADCP name in addition to the file
     %
     % Constructor Arguments
@@ -8,7 +8,7 @@ classdef ADCP_Ship_Combo < Instrument
     %   data_file: (default=string.empty) - filepath
     %   adcp_name: string (default="") - name of the adcp as defined in the
     %                                    combo file
-    %   variables: string (default=string.empty) - string array containing 
+    %   variables: string (default=string.empty) - string array containing
     %                           the name of the instrument variables to be
     %                           loaded. If empty all variables should be
     %                           loaded.
@@ -22,12 +22,12 @@ classdef ADCP_Ship_Combo < Instrument
     %
     % Methods:
     %   get_data(obj,start,stop): Get data struct containing fields defined
-    %                             in variables between two datetimes 
+    %                             in variables between two datetimes
 
     properties
         data_source
         adcp_name string
-    end    
+    end
 
     methods
         function obj = ADCP_Ship_Combo(name,data_file,adcp_name,variables)
@@ -50,14 +50,14 @@ classdef ADCP_Ship_Combo < Instrument
             end
 
             obj = obj@Instrument(name,variables);
-            
+
             obj.data_source = data_file;
             obj.adcp_name = adcp_name;
         end
 
         function data = get_data(obj,start,stop)
             % get data between start and stop
-            % Retrieve data from the data_file between the start and stop 
+            % Retrieve data from the data_file between the start and stop
             % times. The variables included are defined by the variables
             % property and if this is empty all variables are included.
             %
@@ -74,10 +74,10 @@ classdef ADCP_Ship_Combo < Instrument
                 start datetime
                 stop datetime
             end
-            
+
             % load in data
             adcp_data = load(obj.data_source,obj.adcp_name).(obj.adcp_name);
-            
+
             % obj.variables defines which variables are to be included
             % if obj.variables is empty (default) we include all the variables
             if isempty(obj.variables)
@@ -98,7 +98,7 @@ classdef ADCP_Ship_Combo < Instrument
 
             % Return if no datapoints
             if sum(idx) == 0; data = struct([]); return; end
-            
+
             % loop through variables saving each to the output structure
             for var = variables
 
@@ -114,8 +114,9 @@ classdef ADCP_Ship_Combo < Instrument
                 data.(var) = adcp_data.(var)(:,idx);
 
             end
+            % print a message
+            fprintf('    ├── %s\n',obj.name)
         end
-  
+
     end
 end
-
