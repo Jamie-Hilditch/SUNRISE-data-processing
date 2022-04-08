@@ -26,9 +26,12 @@ classdef Vessel
           % if start_stop is empty return an empty structure
           if isempty(start_stop); output = struct([]); return; end
 
+	  start = start_stop(1);
+	  stop = start_stop(2);
+
           % loop through the instruments
           for ins = 1:length(obj.instruments)
-            instument = obj.instruments{ins};
+            instrument = obj.instruments{ins};
             % get data
             data = instrument.get_data(start,stop);
             % if empty then there was no data for this instrument in this section

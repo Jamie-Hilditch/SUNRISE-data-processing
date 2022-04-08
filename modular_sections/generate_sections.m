@@ -16,6 +16,9 @@ master_config = yaml.loadFile('../master_config.yml');
 % Turn off a warning when filling tables, the default fill is 0 which is exactly what we want
 warning('off','MATLAB:table:RowsAddedExistingVars');
 
+% Also turn off a warning about inefficient partial loading if not using v7.3 
+warning('off','MATLAB:MatFile:OlderFormat');
+
 % Location of intermediate processed data
 proc_dir = fullfile(master_config.data_directory,'processed');
 
@@ -47,7 +50,7 @@ PE_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_PE_ADCP.mat');
 PE_1200 = ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200');
 PE_600 = ADCP_Ship_Combo('ADCP_PE_wh600',PE_ADCP_file,'wh600');
 PE_600_no4 = ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4');
-PE_300 = ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh300');
+PE_300 = ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300');
 % setup Pelican hydro
 PE_Hydro = Hydro_Combo('HYDRO_Pelican',fullfile(proc_dir,'combined_hydro','SUNRISE2021_PE_hydro_combo.mat'));
 % setup PE Tchain
@@ -95,13 +98,17 @@ for s = 1:length(surveys)
   sections = readtable(fullfile(surveys(s).folder,surveys(s).name));
 
   % get section numbers
-  section_numbers = unique(sections.('n'));
+  section_numbers = unique(sections.n);
 
   % create a summary table
   summary = table;
+  
+  % define the survey directory for section files
+  survey_directory = fullfile(dir_out,sprintf('survey_%02d',s));
+  if ~exist(survey_directory,'dir'); mkdir(survey_directory); end
 
   % now loop through different sections
-  for n = section_numbers
+  for n = section_numbers'
 
     fprintf('  ├── Section %d\n',n);
 
@@ -124,10 +131,8 @@ for s = 1:length(surveys)
     section_data = catstruct(Pelican_data,Walton_Smith_data,Polly_data,Aries_data);
 
     % save file
-    directory = fullfile(dir_out,sprintf('survey_%02d'));
-    if ~exist(directory,'dir'); mkdir(directory); end
-    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,i);
-    save(fullfile(directory,filename),'-struct','section_data','-v7.3')
+    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
+    save(fullfile(survey_directory,file_name),'-struct','section_data','-v7.3')
 
     fprintf('    ├── Saved section to %s\n',file_name);
 
@@ -135,16 +140,15 @@ for s = 1:length(surveys)
     % Record section number
     summary(n,{'Section Number'}) = {n};
     for field = fieldnames(section_data)
-      summary(n,field) = 1;
+      summary(n,field) = {1};
     end
 
 
   end
 
   % save summary file
-  directory = fullfile(dir_out,sprintf('survey_%02d'));
   summary_file_name = sprintf('SUNRISE_2021_survey_%02d_summary.csv',s);
-  writetable(summary,fullfile(directory,summary_file_name));
+  writetable(summary,fullfile(survey_directory,summary_file_name));
   fprintf('  ├── Saved survey summary to %s\n',summary_file_name);
 
 end
