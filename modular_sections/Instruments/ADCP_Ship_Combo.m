@@ -33,10 +33,10 @@ classdef ADCP_Ship_Combo < Instrument
         function obj = ADCP_Ship_Combo(name,data_file,adcp_name,variables)
             % Constructor
             arguments
-                name string {mustBeTextScalar} = ""
-                data_file {mustBeFile} = string.empty
-                adcp_name string {mustBeTextScalar} = ""
-                variables string {mustBeText} = string.empty
+                name string = ""
+                data_file = string.empty
+                adcp_name string = ""
+                variables string = string.empty
             end
 
             % check file and adcp_name are valid

@@ -28,9 +28,9 @@ classdef Hydro_Combo < Instrument
         function obj = Hydro_Combo(name,data_file,variables)
             %Constructor
             arguments
-                name string {mustBeTextScalar} = ""
-                data_file {mustBeFile} = string.empty
-                variables string {mustBeText} = string.empty
+                name string = ""
+                data_file = string.empty
+                variables string = string.empty
             end
 
             obj = obj@Instrument(name,variables);

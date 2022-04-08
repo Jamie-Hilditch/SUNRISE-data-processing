@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+ml load matlab
+
+# add matlab packages to path
+# export MATLABPATH=../utils/yaml
+
+matlab -nodesktop -nosplash < generate_sections.m
+

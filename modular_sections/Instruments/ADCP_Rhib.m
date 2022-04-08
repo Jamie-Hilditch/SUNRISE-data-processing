@@ -47,9 +47,9 @@ classdef ADCP_Rhib < Instrument
         function obj = ADCP_Rhib(name,data_directory,variables)
             % Constructor
             arguments
-                name string {mustBeTextScalar} = ""
-                data_directory {mustBeFolder} = string.empty
-                variables string {mustBeText} = string.empty
+                name string = ""
+                data_directory = string.empty
+                variables string = string.empty
             end
 
             obj = obj@Instrument(name,variables);

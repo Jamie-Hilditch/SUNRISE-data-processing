@@ -34,8 +34,8 @@ classdef (Abstract) Instrument
         function obj = Instrument(name,variables)
             % Constructor
             arguments
-                name string {mustBeTextScalar} = ""
-                variables (1,:) string {mustBeText} = string.empty
+                name string = ""
+                variables (1,:) string = string.empty
             end
 
             obj.name = name;

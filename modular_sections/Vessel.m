@@ -9,7 +9,7 @@ classdef Vessel
         function obj = Vessel(instrument)
             % Constructor
             arguments (Repeating)
-                instrument {mustBeA(instrument,Instruments.Instrument)}
+                instrument
             end
 
             % cell array of instruments
@@ -19,6 +19,7 @@ classdef Vessel
         function output = get_all_data(obj,start_stop)
 
           arguments
+	    obj
             start_stop datetime
           end
 

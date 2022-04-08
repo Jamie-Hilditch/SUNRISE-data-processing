@@ -25,12 +25,9 @@ dir_out = fullfile(master_config.data_directory,'sections');
 % Get survey metadata
 surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
 
-% import instrument classes
-import Instruments.ADCP_Ship_Combo
-import Instruments.ADCP_Rhib
-import Instruments.Hydro_Combo
-import Instruments.VMP_Combo
-import Instruments.Tchain
+% add instrument classes to path
+addpath(genpath('Instruments'));
+
 
 % set up the instruments individually in structures by vessel
 % We can control exactly which instruments and which variables to save to the section files
@@ -57,11 +54,11 @@ PE_Hydro = Hydro_Combo('HYDRO_Pelican',fullfile(proc_dir,'combined_hydro','SUNRI
 PE_TChain = Tchain('TCHAIN_Pelican',fullfile(Tchain_directory,'Pelican'));
 
 % create the Pelican Vessel class
-Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_Tchain);
+Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_TChain);
 
 % setup the Walton Smith Instruments
 % setup the Walton Smith ADCPs
-WS_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_WS_ADCP.mat');
+WS_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_WS_adcp.mat');
 WS_1200 = ADCP_Ship_Combo('ADCP_WS_wh1200',WS_ADCP_file,'wh1200');
 WS_600 = ADCP_Ship_Combo('ADCP_WS_wh600',WS_ADCP_file,'wh600');
 WS_600_no2 = ADCP_Ship_Combo('ADCP_WS_wh600_no2',WS_ADCP_file,'wh600_no_beam2');
@@ -110,7 +107,7 @@ for s = 1:length(surveys)
     Polly_start_stop = this_section{find(ismember('Polly',this_section.vessel)),["start_utc","end_utc"]};
     Aries_start_stop = this_section{find(ismember('Aries',this_section.vessel)),["start_utc","end_utc"]};
 
-    Pelican_data = Pelican.get_all_data(PE_start_stop;
+    Pelican_data = Pelican.get_all_data(PE_start_stop);
     Walton_Smith_data = Walton_Smith.get_all_data(WS_start_stop);
     Polly_data = Polly.get_all_data(Polly_start_stop);
     Aries_data = Aries.get_all_data(Aries_start_stop);
@@ -140,22 +137,3 @@ for s = 1:length(surveys)
 
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%
