@@ -1,7 +1,7 @@
 function directory2v73(directory)
-  """Convert all mat files in a directory to v7.3"""
+  % Convert all mat files in a directory to v7.3
 
-  files = dir(fullfile(directory,"*.mat"))
+  files = dir(fullfile(directory,"*.mat"));
   for i = 1:length(files)
       clear adcp
       fname = fullfile(files(i).folder,files(i).name);
