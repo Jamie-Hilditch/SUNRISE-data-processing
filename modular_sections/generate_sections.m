@@ -92,19 +92,12 @@ fprintf("Setup Aries Instruments\n")
 % create a string array of vessel names
 % NB this code assumes that these names are used in the sections metadata table
 % if not then we need a structure mapping from these names to the those in the table
-vessel_names = string(fieldnames(vessels))'
+vessel_names = string(fieldnames(vessels))';
 
 % now we loop over surveys
 for s = 1:length(surveys)
 
   fprintf("├──Beginning survey %d\n",s)
-
-  % define the filepath
-  file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
-  file_path = fullfile(survey_directory,file_name);
-
-  % delete the old file if it exists
-  if isfile(file_path); del(file_path); end;
 
   % load in survey sections metadata
   sections = readtable(fullfile(surveys(s).folder,surveys(s).name));
@@ -124,11 +117,18 @@ for s = 1:length(surveys)
 
     fprintf('  ├── Section %d\n',n);
 
+    % define the filepath
+    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
+    file_path = fullfile(survey_directory,file_name);
+
+    % delete the old file if it exists
+    if isfile(file_path); delete(file_path); end;
+
     % get the relevant rows of the table
     this_section = sections(sections.n == n,:);
 
     % now loop over the vessels
-    for vname in vessel_names
+    for vname = vessel_names
       % get the section start and end times are this vessel
       % these arrays are empty if the vessel is not found for that section
       start_stop = this_section{find(ismember(vname,this_section.vessel)),["start_utc","end_utc"]}
