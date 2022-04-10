@@ -17,7 +17,7 @@ master_config = yaml.loadFile('../master_config.yml');
 warning('off','MATLAB:table:RowsAddedExistingVars');
 
 % Also turn off a warning about inefficient partial loading if not using v7.3
-warning('off','MATLAB:MatFile:OlderFormat');
+% warning('off','MATLAB:MatFile:OlderFormat');
 
 % Location of intermediate processed data
 proc_dir = fullfile(master_config.data_directory,'processed');
