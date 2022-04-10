@@ -23,7 +23,8 @@ classdef Vessel
             start datetime
             stop datetime
           end
-
+	  
+	  output = struct;
 
           % loop through the instruments
           for ins = 1:length(obj.instruments)

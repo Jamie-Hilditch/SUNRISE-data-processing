@@ -33,6 +33,8 @@ addpath(genpath('Instruments'));
 
 % ###### SETUP VESSELS AND INSTRUMENTS ###### %
 
+fprintf("Setting up vessels and instruments\n")
+
 % set up the instruments individually in by vessel
 % we can control exactly which instruments and which variables to save to the section files
 
@@ -49,7 +51,7 @@ vessels.Pelican = Vessel(ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200')
                          ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4'), ...
                          ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300'), ...
                          Hydro_Combo('HYDRO_Pelican',PE_Hydro_file), ...
-                         Tchain('TCHAIN_Pelican',PE_Tchain_directory));
+                         Tchain('TCHAIN_Pelican',PE_TChain_directory));
 
 fprintf("Setup Pelican Instruments\n")
 
@@ -69,7 +71,7 @@ vessels.Walton_Smith = Vessel(ADCP_Ship_Combo('ADCP_WS_wh1200',WS_ADCP_file,'wh1
 fprintf("Setup Walton Smith Instruments\n")
 
 % setup Polly Instruments
-Polly_TChain_directory = fullfile(proc_dir,'tchain','Polly')
+Polly_TChain_directory = fullfile(proc_dir,'tchain','Polly');
 
 % create Polly Vessel Class and intruments
 vessels.Polly = Vessel(Tchain('TCHAIN_Polly',Polly_TChain_directory));
@@ -77,7 +79,7 @@ vessels.Polly = Vessel(Tchain('TCHAIN_Polly',Polly_TChain_directory));
 fprintf("Setup Polly Instruments\n")
 
 % setup Aries Instruments
-Aries_TChain_directory = fullfile(proc_dir,'tchain','Polly')
+Aries_TChain_directory = fullfile(proc_dir,'tchain','Aries');
 
 % create Polly Vessel Class and intruments
 vessels.Aries = Vessel(Tchain('TCHAIN_Aries',Aries_TChain_directory));
@@ -122,21 +124,20 @@ for s = 1:length(surveys)
     this_section = sections(sections.n == n,:);
 
     % create a cell array to store section data
-    section_data = cell(1,length(vessel_names));
+    section_data = cell.empty;
 
     % now loop over the vessels
-    for v = 1:length(vessel_names)
-      vname = vessel_names(v);
+    for vname = vessel_names;
 
       % get the section start and end times are this vessel
       % these arrays are empty if the vessel is not found for that section
-      start_stop = this_section{find(ismember(vname,this_section.vessel)),["start_utc","end_utc"]}
+      start_stop = this_section{find(ismember(vname,this_section.vessel)),["start_utc","end_utc"]};
 
       % if empty we are done with this vessel
       if isempty(start_stop); continue; end;
 
       % get section data for this vessel
-      section_data{v} = vessels.(vname).get_all_data(start_stop(1),start_stop(2));
+      section_data = [section_data,vessels.(vname).get_all_data(start_stop(1),start_stop(2))];
 
     end
 
@@ -151,7 +152,7 @@ for s = 1:length(surveys)
 
     % add a row into the summary table
     summary(n,{'Section Number'}) = {n};
-    for field = fieldnames(section_data)
+    for field = fieldnames(section_structure)
       summary(n,field) = {1};
     end
 
