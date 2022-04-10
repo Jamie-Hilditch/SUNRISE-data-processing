@@ -158,6 +158,11 @@ for s = 1:length(surveys)
 
   end
 
+  % sort summary table instruments alphabetically 
+  table_instruments = summary.Properties.VariableNames;
+  table_instruments(strcmp(table_instruments,'Section Number')) = [];
+  summary = summary(:,['Section Number',sort(table_instruments)]);
+
   % save the summary table
   summary_file_name = sprintf('SUNRISE_2021_survey_%02d_summary.csv',s);
   writetable(summary,fullfile(survey_directory,summary_file_name));
