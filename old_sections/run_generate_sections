@@ -5,5 +5,5 @@ ml load matlab
 # add matlab packages to path
 # export MATLABPATH=../utils/yaml
 
-matlab < generate_sections.m
+matlab -nodesktop -nosplash < generate_sections.m
 
