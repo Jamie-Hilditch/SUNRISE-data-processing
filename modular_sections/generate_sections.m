@@ -31,70 +31,71 @@ surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
 % add instrument classes to path
 addpath(genpath('Instruments'));
 
+% ###### SETUP VESSELS AND INSTRUMENTS ###### %
 
-% set up the instruments individually in structures by vessel
-% We can control exactly which instruments and which variables to save to the section files
-
-% define a couple of variables for convenience
-Tchain_directory = fullfile(proc_dir,'tchain');
-% the rhib files could do with tidying, all the data is saved twice
-% we could only save a subset of the these variables because these files are large
-rhib_adcp_variables = ["u","v","w","depth","z","dn","config","ahrs_gyro","computed_heading",...
-    "vessel_u","vessel_v","time","heading","pitch","roll","nuc_time","bt_range",...
-    "bt_range","bt_vel","bt_time","vessel_heading","vessel_lat","vessel_lon",...
-    "vel","echo_intens","corr","ahrs_rotm","processing"];
+% set up the instruments individually in by vessel
+% we can control exactly which instruments and which variables to save to the section files
 
 % setup the Pelican instruments
-% setup the Pelican ADCPs
+% define Pelican data sources
 PE_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_PE_ADCP.mat');
-PE_1200 = ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200');
-PE_600 = ADCP_Ship_Combo('ADCP_PE_wh600',PE_ADCP_file,'wh600');
-PE_600_no4 = ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4');
-PE_300 = ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300');
-% setup Pelican hydro
-PE_Hydro = Hydro_Combo('HYDRO_Pelican',fullfile(proc_dir,'combined_hydro','SUNRISE2021_PE_hydro_combo.mat'));
-% setup PE Tchain
-PE_TChain = Tchain('TCHAIN_Pelican',fullfile(Tchain_directory,'Pelican'));
+PE_Hydro_file = fullfile(proc_dir,'combined_hydro','SUNRISE2021_PE_hydro_combo.mat');
+PE_TChain_directory = fullfile(proc_dir,'tchain','Pelican');
 
-% create the Pelican Vessel class and put it in a vessels structure
-vessels.Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_TChain);
+% create the Pelican Vessel class and instruments
+% store the vessels in a structure
+vessels.Pelican = Vessel(ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200'), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh600',PE_ADCP_file,'wh600'), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4'), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300'), ...
+                         Hydro_Combo('HYDRO_Pelican',PE_Hydro_file), ...
+                         Tchain('TCHAIN_Pelican',PE_Tchain_directory));
+
 fprintf("Setup Pelican Instruments\n")
 
 % setup the Walton Smith Instruments
-% setup the Walton Smith ADCPs
+% define the Walton Smith data sources
 WS_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_WS_adcp.mat');
-WS_1200 = ADCP_Ship_Combo('ADCP_WS_wh1200',WS_ADCP_file,'wh1200');
-WS_600 = ADCP_Ship_Combo('ADCP_WS_wh600',WS_ADCP_file,'wh600');
-WS_600_no2 = ADCP_Ship_Combo('ADCP_WS_wh600_no2',WS_ADCP_file,'wh600_no_beam2');
-% setup Walton Smith VMP
-WS_VMP = VMP_Combo('VMP_Walton_Smith',fullfile(proc_dir,'VMP','SUNRISE2021_WS_combo.mat'));
-% setup WS_Tchain
-WS_TChain = Tchain('TCHAIN_Walton_Smith',fullfile(Tchain_directory,'Walton_Smith'));
+WS_VMP_file = fullfile(proc_dir,'VMP','SUNRISE2021_WS_combo.mat');
+WS_TChain_directory = fullfile(proc_dir,'tchain','Walton_Smith');
 
-% create WS Vessel Class
-vessels.Walton_Smith = Vessel(WS_1200,WS_600,WS_600_no2,WS_VMP,WS_TChain);
+% create WS Vessel Class and intruments
+vessels.Walton_Smith = Vessel(ADCP_Ship_Combo('ADCP_WS_wh1200',WS_ADCP_file,'wh1200'), ...
+                              ADCP_Ship_Combo('ADCP_WS_wh600',WS_ADCP_file,'wh600'), ...
+                              ADCP_Ship_Combo('ADCP_WS_wh600_no2',WS_ADCP_file,'wh600_no_beam2'), ...
+                              VMP_Combo('VMP_Walton_Smith',WS_VMP_file), ...
+                              Tchain('TCHAIN_Walton_Smith',WS_TChain_directory));
+
 fprintf("Setup Walton Smith Instruments\n")
 
-% setup the rhib instuments
-% adcps first
-ADCP_Polly = ADCP_Rhib('ADCP_Polly',fullfile(proc_dir,'adcp_rhib','polly'),rhib_adcp_variables);
-ADCP_Aries = ADCP_Rhib('ADCP_Aries',fullfile(proc_dir,'adcp_rhib','aries'),rhib_adcp_variables);
-% rhib Tchains
-Polly_TChain = Tchain('TCHAIN_Polly',fullfile(Tchain_directory,'Polly'));
-Aries_TChain = Tchain('TCHAIN_Aries',fullfile(Tchain_directory,'Aries'));
+% setup Polly Instruments
+Polly_TChain_directory = fullfile(proc_dir,'tchain','Polly')
 
-% create Vessel Classes for the two rhibs
-vessels.Polly = Vessel(ADCP_Polly,Polly_TChain);
+% create Polly Vessel Class and intruments
+vessels.Polly = Vessel(Tchain('TCHAIN_Polly',Polly_TChain_directory));
+
 fprintf("Setup Polly Instruments\n")
-vessels.Aries = Vessel(ADCP_Aries,Aries_TChain);
+
+% setup Aries Instruments
+Aries_TChain_directory = fullfile(proc_dir,'tchain','Polly')
+
+% create Polly Vessel Class and intruments
+vessels.Aries = Vessel(Tchain('TCHAIN_Aries',Aries_TChain_directory));
+
 fprintf("Setup Aries Instruments\n")
 
 % create a string array of vessel names
-% NB this code assumes that these names are used in the sections metadata table
+% note that this code assumes that these names are used in the sections metadata table
 % if not then we need a structure mapping from these names to the those in the table
 vessel_names = string(fieldnames(vessels))';
 
-% now we loop over surveys
+fprintf("Setup Complete\n\n")
+
+% ###### SETUP COMPLETE ###### %
+
+% ###### NOW GENERATE SOME SECTIONS ###### %
+
+% we loop over surveys
 for s = 1:length(surveys)
 
   fprintf("├──Beginning survey %d\n",s)
@@ -117,18 +118,16 @@ for s = 1:length(surveys)
 
     fprintf('  ├── Section %d\n',n);
 
-    % define the filepath
-    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
-    file_path = fullfile(survey_directory,file_name);
-
-    % delete the old file if it exists
-    if isfile(file_path); delete(file_path); end;
-
     % get the relevant rows of the table
     this_section = sections(sections.n == n,:);
 
+    % create a cell array to store section data
+    section_data = cell(1,length(vessel_names));
+
     % now loop over the vessels
-    for vname = vessel_names
+    for v = 1:length(vessel_names)
+      vname = vessel_names(v);
+
       % get the section start and end times are this vessel
       % these arrays are empty if the vessel is not found for that section
       start_stop = this_section{find(ismember(vname,this_section.vessel)),["start_utc","end_utc"]}
@@ -137,28 +136,36 @@ for s = 1:length(surveys)
       if isempty(start_stop); continue; end;
 
       % get section data for this vessel
-      section_data = vessels.(vname).get_all_data(start_stop(1),start_stop(2));
-
-      % add this data to the file
-      save(file_path,'-struct','section_data','-v7.3','-append')
+      section_data{v} = vessels.(vname).get_all_data(start_stop(1),start_stop(2));
 
     end
 
+    % concatenate all data into one structure
+    section_structure = catstruct(section_data{:});
+
+    % save file
+    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
+    save(fullfile(survey_directory,file_name),'-struct','section_structure','-v7.3')
+
     fprintf('    ├── Saved section to %s\n',file_name);
 
-    % add entry into summary file
-    % Record section number
+    % add a row into the summary table
     summary(n,{'Section Number'}) = {n};
     for field = fieldnames(section_data)
       summary(n,field) = {1};
     end
 
-
   end
 
-  % save summary file
+  % save the summary table
   summary_file_name = sprintf('SUNRISE_2021_survey_%02d_summary.csv',s);
   writetable(summary,fullfile(survey_directory,summary_file_name));
   fprintf('  ├── Saved survey summary to %s\n',summary_file_name);
 
 end
+
+
+% rhib_adcp_variables = ["u","v","w","depth","z","dn","config","ahrs_gyro","computed_heading",...
+%     "vessel_u","vessel_v","time","heading","pitch","roll","nuc_time","bt_range",...
+%     "bt_range","bt_vel","bt_time","vessel_heading","vessel_lat","vessel_lon",...
+%     "vel","echo_intens","corr","ahrs_rotm","processing"];
