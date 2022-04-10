@@ -81,7 +81,7 @@ fprintf("Setup Polly Instruments\n")
 % setup Aries Instruments
 Aries_TChain_directory = fullfile(proc_dir,'tchain','Aries');
 
-% create Polly Vessel Class and intruments
+% create Aries Vessel Class and intruments
 vessels.Aries = Vessel(Tchain('TCHAIN_Aries',Aries_TChain_directory));
 
 fprintf("Setup Aries Instruments\n")
@@ -127,7 +127,7 @@ for s = 1:length(surveys)
     section_data = cell.empty;
 
     % now loop over the vessels
-    for vname = vessel_names;
+    for vname = vessel_names
 
       % get the section start and end times are this vessel
       % these arrays are empty if the vessel is not found for that section
