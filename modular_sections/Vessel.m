@@ -16,18 +16,14 @@ classdef Vessel
             obj.instruments = instrument;
         end
 
-        function output = get_all_data(obj,start_stop)
+        function output = get_all_data(obj,start,stop)
 
           arguments
-	    obj
-            start_stop datetime
+	          obj
+            start datetime
+            stop datetime
           end
 
-          % if start_stop is empty return an empty structure
-          if isempty(start_stop); output = struct([]); return; end
-
-	  start = start_stop(1);
-	  stop = start_stop(2);
 
           % loop through the instruments
           for ins = 1:length(obj.instruments)

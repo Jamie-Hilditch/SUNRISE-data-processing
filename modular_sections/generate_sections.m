@@ -16,7 +16,7 @@ master_config = yaml.loadFile('../master_config.yml');
 % Turn off a warning when filling tables, the default fill is 0 which is exactly what we want
 warning('off','MATLAB:table:RowsAddedExistingVars');
 
-% Also turn off a warning about inefficient partial loading if not using v7.3 
+% Also turn off a warning about inefficient partial loading if not using v7.3
 warning('off','MATLAB:MatFile:OlderFormat');
 
 % Location of intermediate processed data
@@ -56,8 +56,8 @@ PE_Hydro = Hydro_Combo('HYDRO_Pelican',fullfile(proc_dir,'combined_hydro','SUNRI
 % setup PE Tchain
 PE_TChain = Tchain('TCHAIN_Pelican',fullfile(Tchain_directory,'Pelican'));
 
-% create the Pelican Vessel class
-Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_TChain);
+% create the Pelican Vessel class and put it in a vessels structure
+vessels.Pelican = Vessel(PE_1200,PE_600,PE_600_no4,PE_300,PE_Hydro,PE_TChain);
 fprintf("Setup Pelican Instruments\n")
 
 % setup the Walton Smith Instruments
@@ -72,7 +72,7 @@ WS_VMP = VMP_Combo('VMP_Walton_Smith',fullfile(proc_dir,'VMP','SUNRISE2021_WS_co
 WS_TChain = Tchain('TCHAIN_Walton_Smith',fullfile(Tchain_directory,'Walton_Smith'));
 
 % create WS Vessel Class
-Walton_Smith = Vessel(WS_1200,WS_600,WS_600_no2,WS_VMP,WS_TChain);
+vessels.Walton_Smith = Vessel(WS_1200,WS_600,WS_600_no2,WS_VMP,WS_TChain);
 fprintf("Setup Walton Smith Instruments\n")
 
 % setup the rhib instuments
@@ -84,15 +84,27 @@ Polly_TChain = Tchain('TCHAIN_Polly',fullfile(Tchain_directory,'Polly'));
 Aries_TChain = Tchain('TCHAIN_Aries',fullfile(Tchain_directory,'Aries'));
 
 % create Vessel Classes for the two rhibs
-Polly = Vessel(ADCP_Polly,Polly_TChain);
+vessels.Polly = Vessel(ADCP_Polly,Polly_TChain);
 fprintf("Setup Polly Instruments\n")
-Aries = Vessel(ADCP_Aries,Aries_TChain);
+vessels.Aries = Vessel(ADCP_Aries,Aries_TChain);
 fprintf("Setup Aries Instruments\n")
+
+% create a string array of vessel names
+% NB this code assumes that these names are used in the sections metadata table
+% if not then we need a structure mapping from these names to the those in the table
+vessel_names = string(fieldnames(vessels))'
 
 % now we loop over surveys
 for s = 1:length(surveys)
 
   fprintf("├──Beginning survey %d\n",s)
+
+  % define the filepath
+  file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
+  file_path = fullfile(survey_directory,file_name);
+
+  % delete the old file if it exists
+  if isfile(file_path); del(file_path); end;
 
   % load in survey sections metadata
   sections = readtable(fullfile(surveys(s).folder,surveys(s).name));
@@ -102,7 +114,7 @@ for s = 1:length(surveys)
 
   % create a summary table
   summary = table;
-  
+
   % define the survey directory for section files
   survey_directory = fullfile(dir_out,sprintf('survey_%02d',s));
   if ~exist(survey_directory,'dir'); mkdir(survey_directory); end
@@ -115,24 +127,22 @@ for s = 1:length(surveys)
     % get the relevant rows of the table
     this_section = sections(sections.n == n,:);
 
-    % get the start and end times for each vessel
-    % these arrays are empty if the vessel is not found for that section
-    PE_start_stop = this_section{find(ismember('Pelican',this_section.vessel)),["start_utc","end_utc"]};
-    WS_start_stop = this_section{find(ismember('Walton_Smith',this_section.vessel)),["start_utc","end_utc"]};
-    Polly_start_stop = this_section{find(ismember('Polly',this_section.vessel)),["start_utc","end_utc"]};
-    Aries_start_stop = this_section{find(ismember('Aries',this_section.vessel)),["start_utc","end_utc"]};
+    % now loop over the vessels
+    for vname in vessel_names
+      % get the section start and end times are this vessel
+      % these arrays are empty if the vessel is not found for that section
+      start_stop = this_section{find(ismember(vname,this_section.vessel)),["start_utc","end_utc"]}
 
-    Pelican_data = Pelican.get_all_data(PE_start_stop);
-    Walton_Smith_data = Walton_Smith.get_all_data(WS_start_stop);
-    Polly_data = Polly.get_all_data(Polly_start_stop);
-    Aries_data = Aries.get_all_data(Aries_start_stop);
+      % if empty we are done with this vessel
+      if isempty(start_stop); continue; end;
 
-    % concatenate structures
-    section_data = catstruct(Pelican_data,Walton_Smith_data,Polly_data,Aries_data);
+      % get section data for this vessel
+      section_data = vessels.(vname).get_all_data(start_stop(1),start_stop(2));
 
-    % save file
-    file_name = sprintf('SUNRISE_2021_survey_%02d_section_%02d.mat',s,n);
-    save(fullfile(survey_directory,file_name),'-struct','section_data','-v7.3')
+      % add this data to the file
+      save(file_path,'-struct','section_data','-v7.3','-append')
+
+    end
 
     fprintf('    ├── Saved section to %s\n',file_name);
 
