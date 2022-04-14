@@ -41,7 +41,7 @@ classdef ADCP_Ship_Combo < Instrument
 
             % check file and adcp_name are valid
             varlist = who(matfile(data_file));
-            if ~any(strcmp(varlist,adcp_name))
+            if ~isempty(varlist) && ~any(strcmp(varlist,adcp_name))
                 cell_adcps = join(varlist,', ');
                 error('MATLAB:mycode:variableNotFound', ...
                     ['Could not find %1s in file %2s.\n', ...
