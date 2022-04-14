@@ -43,6 +43,7 @@ fprintf("Setting up vessels and instruments\n")
 PE_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_PE_ADCP.mat');
 PE_Hydro_file = fullfile(proc_dir,'combined_hydro','SUNRISE2021_PE_hydro_combo.mat');
 PE_TChain_directory = fullfile(proc_dir,'tchain','Pelican');
+PE_FTMET_file = fullfile(proc_dir,'ship_das','SUNRISE2021_PE_shipdata.mat');
 
 % create the Pelican Vessel class and instruments
 % store the vessels in a structure
@@ -51,7 +52,8 @@ vessels.Pelican = Vessel(ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200')
                          ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4'), ...
                          ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300'), ...
                          Hydro_Combo('HYDRO_Pelican',PE_Hydro_file), ...
-                         Tchain('TCHAIN_Pelican',PE_TChain_directory));
+                         Tchain('TCHAIN_Pelican',PE_TChain_directory), ...
+                         FTMET_mat('FTMET_Pelican',PE_FTMET_file));
 
 fprintf("Setup Pelican Instruments\n")
 
@@ -158,7 +160,7 @@ for s = 1:length(surveys)
 
   end
 
-  % sort summary table instruments alphabetically 
+  % sort summary table instruments alphabetically
   table_instruments = summary.Properties.VariableNames;
   table_instruments(strcmp(table_instruments,'Section Number')) = [];
   summary = summary(:,['Section Number',sort(table_instruments)]);
