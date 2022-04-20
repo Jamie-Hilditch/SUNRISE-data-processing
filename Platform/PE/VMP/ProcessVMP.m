@@ -47,7 +47,7 @@ dz = 1; % m
 
 %% reading file
 Raw_list = dir([VMP_RAWP_Path '*.P']);
-Raw_list = Raw_list(~endsWith({Raw_list.name}, '_original.P'));
+Raw_list = Raw_list(~endsWith({Raw_list.name}, '_original.P') & ~startsWith({Raw_list.name}, '._'));
 
 proc_idx = 1:2;%length(Raw_list);
 
@@ -394,6 +394,7 @@ for i = proc_idx
         
         %% bin
         vmp_names=[{'JAC_theta'};{'JAC_T'};{'JAC_C'};{'JAC_SP'};{'JAC_SA'};{'JAC_sigma'};{'JAC_rho'};{'e'};{'Chlorophyll'};{'Turbidity'}];
+        vmp_names_combo=[{'theta'};{'T'};{'C'};{'SP'};{'SA'};{'sigma'};{'rho'};{'epsi'};{'Fl'};{'Turbi'}]; %%% Unified Name for Project
         
         for k = 1:length(vmp_names)
             temp = vmp_profile.(vmp_names{k});
@@ -430,7 +431,7 @@ for i = proc_idx
                 end
                 temp3(temp3==0) = nan;
             end
-            vmp_combo_temp.(vmp_names{k})= temp3;
+            vmp_combo_temp.(vmp_names_combo{k})= temp3;
         end
         
         vmp_combo_temp.dn = vmp_profile.dn;
@@ -448,15 +449,17 @@ for i = proc_idx
             vmp_combo_temp.ToB = vmp_profile.ToB;
         end
         
+        
+        
         if exist([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'file')
             vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
             
             N_str = length(vmp_combo.dn)+1;
             
-            vmp_names = [{'JAC_theta'};{'JAC_T'};{'JAC_C'};{'JAC_SP'};{'JAC_SA'};{'JAC_sigma'};{'JAC_rho'};{'e'};{'Chlorophyll'};{'Turbidity'}];
+            vmp_names_combo=[{'theta'};{'T'};{'C'};{'SP'};{'SA'};{'sigma'};{'rho'};{'epsi'};{'Fl'};{'Turbi'}]; %%% Unified Name for Project
             
-            for k = 1:length(vmp_names)
-                vmp_combo.(vmp_names{k})(:,N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.(vmp_names{k});
+            for k = 1:length(vmp_names_combo)
+                vmp_combo.(vmp_names_combo{k})(:,N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.(vmp_names_combo{k});
             end
             
             vmp_combo.dn(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.dn;
@@ -476,7 +479,7 @@ for i = proc_idx
         else
             vmp_combo = vmp_combo_temp;
         end
-        save([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'-struct','vmp_combo','-v7.3')
+        save([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat'],'-struct','vmp_combo','-v7.3')
         movefile([VMP_RAWP_Path Raw_list(i).name],[VMP_RAWP_Path '/done/' Raw_list(i).name])
         clear vmp_profile vmp_combo_temp vmp_combo
     end
@@ -485,7 +488,7 @@ fclose(logid);
 
 %% sort and remove duplicated profile
 
-vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
+vmp_combo = load([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat']);
 
 [~,idx_temp] = sort(vmp_combo.dn);
 
@@ -493,10 +496,10 @@ duplicate_idx = find(diff(vmp_combo.dn(idx_temp))==0);
 
 idx_temp(duplicate_idx) = [];
 
-vmp_names = [{'JAC_theta'};{'JAC_T'};{'JAC_C'};{'JAC_SP'};{'JAC_SA'};{'JAC_sigma'};{'JAC_rho'};{'e'};{'Chlorophyll'};{'Turbidity'}];
+vmp_names_combo=[{'theta'};{'T'};{'C'};{'SP'};{'SA'};{'sigma'};{'rho'};{'epsi'};{'Fl'};{'Turbi'}]; %%% Unified Name for Project
 
-for k = 1:length(vmp_names)
-    vmp_combo.(vmp_names{k}) = vmp_combo.(vmp_names{k})(:,idx_temp);
+for k = 1:length(vmp_names_combo)
+    vmp_combo.(vmp_names_combo{k}) = vmp_combo.(vmp_names_combo{k})(:,idx_temp);
 end
 
 vmp_combo.dn = vmp_combo.dn(idx_temp);
@@ -513,4 +516,4 @@ if isfield(vmp_combo,'tau')
     vmp_combo.ToB = vmp_combo.ToB(idx_temp);
 end
 
-save([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'-struct','vmp_combo','-v7.3')
+save([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat'],'-struct','vmp_combo','-v7.3')

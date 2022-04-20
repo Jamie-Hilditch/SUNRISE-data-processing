@@ -5,6 +5,7 @@ Project = 'SUNRISE2021';
 Platform = 'PE';
 Prefix = [Project '_' Platform];
 datapath = ['../../../../data/Platform/' Platform '/'];
+Processed_Path = '../../../../data/Processed/';
 
 %% lat/lon center
 lon_c = -92.5;
@@ -20,7 +21,7 @@ switch Process_Mode
         VMP_RAWM_Path = [datapath Process_Mode '/RAW_mat_File/']; % raw mat file
         VMP_PROC_Path = [datapath Process_Mode '/Proc_profile_matfile/']; % saving single profile
         VMP_PROC_P_Combine_Path = [datapath Process_Mode '/Proc_combine_matfile/']; % Partially combine
-        VMP_PROC_final_Path = ['../../../../data/processed/' Process_Mode '/']; % combine
+        VMP_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
         
         ship = matfile(['../../../../data/processed/ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
         
@@ -38,7 +39,7 @@ switch Process_Mode
         CTD_RAWR_Path = [datapath Process_Mode '/RAW_RSK_File/']; % raw rsk file
         CTD_RAWM_Path = [datapath Process_Mode '/RAW_mat_File/']; % raw mat file
         CTD_PROC_Path = [datapath Process_Mode '/RAW_mat_File/']; % saving single profile       
-        CTD_PROC_final_Path = ['../../../../data/processed/' Process_Mode '/']; % combine
+        CTD_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
         
         ship = matfile(['../../../../data/processed/ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
         
@@ -51,12 +52,17 @@ switch Process_Mode
         %% Das processing
         %%% Das Path
         DAS_RAW_Path = [datapath Process_Mode '/']; % raw das file    
-        DAS_PROC_final_Path = ['../../../../data/processed/' Process_Mode '/']; % combine
+        DAS_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
                 
     case 'ADCP_UHDAS'
-        ADCP_Proc_Path = [datapath Process_Mode '/ADCP/']; % After UHDAS
+        ADCP_Project_name = 'PE21_24_merge';
+        ADCP_name = {'wh1200','wh600','wh600_nobeam4','wh300'};
+        ADCP_PROC_Path = [datapath Process_Mode '/' ADCP_Project_name '/proc/']; 
+        
         ADCP_PROC_final_Path = '../../../../data/processed/ADCP/'; % combine
         
+        ship = matfile(['../../../../data/processed/ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
+       
     case 'PostProcessing'
         %% vmp processing
         Bundle_Path = '../../Processed Bundle/';
