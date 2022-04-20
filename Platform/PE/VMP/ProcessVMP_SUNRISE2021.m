@@ -3,13 +3,12 @@
 %%% It based on quick_look and OSU 2019 version.
 %%% code start %%%
 %% initial setup
-
 clear
 close all
 
 %%% setting path and pre-loading files
-addpath('../../general toolbox/')
-dictionary = 'vmp';
+addpath('../_Config')
+Process_Mode = 'VMP';
 data_path %% all data path and library
 
 %% version check
@@ -43,14 +42,14 @@ diss_info.diss_length_fac   = 2; % no unit, >2*fft_length Rec:>3
 bot_mod = 1;
 
 %% bin
-level = 160; %1m bin
-dz = 0.25;
+level = 40; 
+dz = 1; % m
 
 %% reading file
 Raw_list = dir([VMP_RAWP_Path '*.P']);
 Raw_list = Raw_list(~endsWith({Raw_list.name}, '_original.P'));
 
-proc_idx = 1:length(Raw_list);
+proc_idx = 1:2;%length(Raw_list);
 
 
 for i = proc_idx
@@ -143,7 +142,7 @@ for i = proc_idx
         
         %% Jac salinity lag cali. & Density
         %match JAC_T w/ JAC_C&FP07
-        lag_JAC = dsearchn(xcorr(raw_mat.T1_slow,raw_mat.JAC_T,100,'normalized'),1)-101;
+        lag_JAC = dsearchn(xcorr(raw_mat.T1_slow,raw_mat.JAC_T,20,'normalized'),1)-21;
         raw_mat.JAC_T = circshift(raw_mat.JAC_T,lag_JAC);
         
         raw_mat.JAC_SP = gsw_SP_from_C(raw_mat.JAC_C,raw_mat.JAC_T,raw_mat.P_slow);
@@ -181,7 +180,7 @@ for i = proc_idx
             [~,pr_end_fast] = min(abs(raw_mat.t_fast-raw_mat.t_slow(pr_end)));
             pr_idx_fast = (pr_str_fast:pr_end_fast);
             
-            if ~exist([VMP_PROC_Path basename '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'file')
+            if ~exist([VMP_PROC_Path Prefix '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'file')
                 %% despike
                 % piezo-accelerometers
                 [Ax_des, spikes_Ax, pass_count_Ax, raction_Ax] = despike(raw_mat.Ax(pr_idx_fast), despike_A.thres, despike_A.smooth , raw_mat.fs_fast, round(despike_A.N_FS*raw_mat.fs_fast));
@@ -257,10 +256,10 @@ for i = proc_idx
                 %% attach GPS
                 vmp.dn = raw_mat.filetime + raw_mat.t_slow(pr_str)/86400;
                 
-                [~,time_idx] = min(abs(ship.das.time-vmp.dn));
-                vmp.lat = ship.das.lat(time_idx);
-                vmp.lon = ship.das.lon(time_idx);
-                vmp.dist = ship.das.dist(time_idx);
+                [~,time_idx] = min(abs(ship.dn-vmp.dn));
+                vmp.lat = ship.lat(time_idx,1);
+                vmp.lon = ship.lon(time_idx,1);
+                vmp.dist_vmp = ship.dist_ship(time_idx,1);
                 
                 %% prepare mat-file
                 % name save into vmp mat
@@ -287,13 +286,13 @@ for i = proc_idx
                 
                 %% save mat-file
                 
-                save([VMP_PROC_Path basename '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'vmp','diss_info','diss','bio')
+                save([VMP_PROC_Path Prefix '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'vmp','diss_info','diss','bio')
                 
                 if bot_mod
-                    save([VMP_PROC_Path basename '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'BBL_info','BBL','-append')
+                    save([VMP_PROC_Path Prefix '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'],'BBL_info','BBL','-append')
                 end
             else
-                load([VMP_PROC_Path basename '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'])
+                load([VMP_PROC_Path Prefix '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'])
             end
             %% write combined file
             %% VMP JAC&T1/T2
@@ -381,7 +380,7 @@ for i = proc_idx
             vmp_profile.dn(j) = vmp.dn;
             vmp_profile.lat(j) = vmp.lat;
             vmp_profile.lon(j) = vmp.lon;
-            vmp_profile.dist(j) = vmp.dist;
+            vmp_profile.dist_vmp(j) = vmp.dist_vmp;
             
             if isstruct(BBL_info)
                 vmp_profile.u_star(j) = BBL.u_star;
@@ -391,7 +390,7 @@ for i = proc_idx
             end
             
         end
-        save([VMP_PROC_final_Path '/combine/' basename '_raw_profile_combine' datestr(vmp_profile.dn(end),'yyyymmddHHMMSS') '.mat'],'vmp_profile')
+        save([VMP_PROC_P_Combine_Path  Prefix '_raw_profile_combine' datestr(vmp_profile.dn(end),'yyyymmddHHMMSS') '.mat'],'vmp_profile')
         
         %% bin
         vmp_names=[{'JAC_theta'};{'JAC_T'};{'JAC_C'};{'JAC_SP'};{'JAC_SA'};{'JAC_sigma'};{'JAC_rho'};{'e'};{'Chlorophyll'};{'Turbidity'}];
@@ -437,7 +436,7 @@ for i = proc_idx
         vmp_combo_temp.dn = vmp_profile.dn;
         vmp_combo_temp.lat = vmp_profile.lat;
         vmp_combo_temp.lon = vmp_profile.lon;
-        vmp_combo_temp.dist = vmp_profile.dist;
+        vmp_combo_temp.dist_vmp = vmp_profile.dist_vmp;
         vmp_combo_temp.data_num = vmp_profile.data_num;
         vmp_combo_temp.profile = vmp_profile.profile;
         vmp_combo_temp.depth = (-0.5:-1:-level+0.5);
@@ -449,8 +448,8 @@ for i = proc_idx
             vmp_combo_temp.ToB = vmp_profile.ToB;
         end
         
-        if exist([VMP_PROC_final_Path '/' basename '_combo.mat'],'file')
-            load([VMP_PROC_final_Path '/' basename '_combo.mat'])
+        if exist([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'file')
+            vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
             
             N_str = length(vmp_combo.dn)+1;
             
@@ -463,7 +462,7 @@ for i = proc_idx
             vmp_combo.dn(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.dn;
             vmp_combo.lat(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.lat;
             vmp_combo.lon(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.lon;
-            vmp_combo.dist(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.dist;
+            vmp_combo.dist_vmp(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.dist_vmp;
             vmp_combo.data_num(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.data_num;
             vmp_combo.profile(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.profile;
             vmp_combo.depth = (-dz/2:-dz:-dz*level+dz/2);
@@ -477,7 +476,7 @@ for i = proc_idx
         else
             vmp_combo = vmp_combo_temp;
         end
-        save([VMP_PROC_final_Path '/' basename '_combo.mat'],'vmp_combo','-v7.3')
+        save([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'-struct','vmp_combo','-v7.3')
         movefile([VMP_RAWP_Path Raw_list(i).name],[VMP_RAWP_Path '/done/' Raw_list(i).name])
         clear vmp_profile vmp_combo_temp vmp_combo
     end
@@ -486,7 +485,7 @@ fclose(logid);
 
 %% sort and remove duplicated profile
 
-load([VMP_PROC_final_Path '/' basename '_combo.mat']);
+vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
 
 [~,idx_temp] = sort(vmp_combo.dn);
 
@@ -503,7 +502,7 @@ end
 vmp_combo.dn = vmp_combo.dn(idx_temp);
 vmp_combo.lat = vmp_combo.lat(idx_temp);
 vmp_combo.lon = vmp_combo.lon(idx_temp);
-vmp_combo.dist = vmp_combo.dist(idx_temp);
+vmp_combo.dist_vmp = vmp_combo.dist_vmp(idx_temp);
 vmp_combo.data_num = vmp_combo.data_num(idx_temp);
 vmp_combo.profile = vmp_combo.profile(idx_temp);
 
@@ -514,4 +513,4 @@ if isfield(vmp_combo,'tau')
     vmp_combo.ToB = vmp_combo.ToB(idx_temp);
 end
 
-save([VMP_PROC_final_Path '/' basename '_combo.mat'],'vmp_combo','-v7.3')
+save([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'-struct','vmp_combo','-v7.3')

@@ -7,8 +7,8 @@ clear
 close all
 
 %%% setting path and pre-loading files
-addpath('../../general toolbox/')
-dictionary = 'ctd';
+addpath('../_Config')
+Process_Mode = 'CTD';
 data_path %% all data path and library
 
 %% version check
@@ -24,7 +24,7 @@ logid = fopen('./ctd_process_log.txt','a');
 Raw_list = dir([CTD_RAWR_Path '*.rsk']);
 %Raw_list = Raw_list(~endsWith({Raw_list.name}, '_original.P'));
 
-proc_idx = 1:length(Raw_list);
+proc_idx = 1:2;%length(Raw_list);
 
 for i = proc_idx
     if exist([CTD_RAWM_Path Raw_list(i).name(1:end-4) '.mat'],'file')
@@ -58,7 +58,7 @@ for i = proc_idx
         end
         
         save([CTD_RAWM_Path Raw_list(i).name(1:end-4) '.mat'],'-struct','raw_mat','-v7.3')
-        movefile([CTD_RAWR_Path Raw_list(i).name],[CTD_RAWR_Path '/done/' Raw_list(i).name])
+        movefile([CTD_RAWR_Path Raw_list(i).name],[CTD_RAWR_Path 'done/' Raw_list(i).name])
         fprintf(logid,'%19s %8s Converting RSK-file.... \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name);
     end
     
@@ -71,7 +71,7 @@ for i = proc_idx
     for j = 1:length(profile_idx)
         CTD_name = {'Pressure','Depth','Conductivity','Salinity','Absolute Salinity','Temperature','Potential Temperature',...
             'Density Anomaly','Dissolved O2','Dissolved O22'};
-        CTD_short = {'P','depth','C','SP','SA','T','theta','sigma','O2R','O2A'};
+        CTD_short = {'P','depth','C','SP','SA','T','theta','sigma','DO2R','DO2A'};
         
         v_idx = find(~isnan(profile.data(profile_idx(j)).values(:,3)));
         N = length(v_idx);
@@ -95,15 +95,15 @@ for i = proc_idx
         
         ctd.dn(j) = profile.data(profile_idx(j)).tstamp(v_idx(1));
         
-        [~,time_idx] = min(abs(ship.das.time-ctd.dn(j)));
-        ctd.lat(j) = ship.das.lat(time_idx);
-        ctd.lon(j) = ship.das.lon(time_idx);
-        ctd.dist(j) = ship.das.dist(time_idx);
-        ctd.data_num(j) = profile.epochs.startTime+profile.instruments.serialID*1e6; %data # on P-file; ex Dat_#.p
+        [~,time_idx] = min(abs(ship.dn-ctd.dn(j)));
+        ctd.lat(j) = ship.lat(time_idx,1);
+        ctd.lon(j) = ship.lon(time_idx,1);
+        ctd.dist_ctd(j) = ship.dist_ship(time_idx,1);
+        ctd.data_num(j) = profile.epochs.startTime+profile.instruments.serialID*1e6; % RBR Serial ID
         ctd.SN(j) = profile.instruments.serialID;
         ctd.profile(j) = j;
     end
-    save([CTD_PROC_final_Path basename '_raw_ctd' datestr(profile.epochs.startTime,'_yyyymmddHHMMSS') '.mat'],'-struct','ctd','-v7.3')
+    save([CTD_PROC_Path Prefix '_raw_ctd' datestr(profile.epochs.startTime,'_yyyymmddHHMMSS') '.mat'],'-struct','ctd','-v7.3')
     clear ctd
 end
 fclose(logid);
