@@ -33,7 +33,7 @@ switch cfg.bin_method
     kp = ~isnan(zbn.*tbn); % indices to keep (non-nan time and depth bin numbers)
 
     % Do the bin-averaging
-    flds = {'t','p','s','lat','lon'};
+    flds = {'T','P','SA','SP','lat','lon'};
     for i = 1:length(flds)
         gridded.(flds{i}) = accumarray([zbn(kp), tbn(kp)], ...      % bin indices
                                        gridded.(flds{i})(kp),...    % values
@@ -97,7 +97,7 @@ switch cfg.bin_method
     % we also need depth bin numbers - just use sensor index
     dbin = [1:length(gridded.pos)]'*ones(1,length(gridded.dn));
     % use accumarray to average all data within each bin
-    flds = {'t','p','s','z'};
+    flds = {'T','P','SA','SP','z'};
     for i = 1:length(flds)
         out.(flds{i}) = accumarray([dbin(:),tbin(:)],gridded.(flds{i})(:),[],@nanmean);
     end

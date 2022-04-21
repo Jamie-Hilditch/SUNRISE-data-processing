@@ -12,7 +12,7 @@ end
 %% Initialize gridded variables
 gridded = struct();
 gridded.dn = (dn_range(1)):perd_base:(dn_range(2));
-flds = {'t','p','s','x','z'};
+flds = {'T','P','SA','SP','x','z'};
 for f = 1:length(flds)
     gridded.(flds{f}) = nan(N,length(gridded.dn));
 end

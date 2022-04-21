@@ -15,10 +15,10 @@ l2z = @(l,a) -a.*cosh(asinh(l./a)) + a; % along-chain position to vertical posit
 a = nan(size(gridded.dn));
 amax = 1e3;  % almost flat
 amin = 1e-5; % almost vertical
-hasp = find(all(isnan(gridded.p),2));
+hasp = find(all(isnan(gridded.P),2));
 
 for i = 1:length(gridded.dn)
-    minfunc = @(a) rssq(-gridded.p(hasp,i) - l2z(gridded.pos(hasp),a));
+    minfunc = @(a) rssq(-gridded.P(hasp,i) - l2z(gridded.pos(hasp),a));
     if i == 1
         a(i) = fminbnd(minfunc,amin,amax); % search full range
     else
