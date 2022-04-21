@@ -52,7 +52,7 @@ while(k < length(timestamp))
     %
     % profile detection part
     evt = 0; % 0 nothing new 1 we are descending 2 we are ascending
-    if hasC && conductivity(k) < conductivityThreshold
+    if hasC && conductivity(k) < conductivityThreshold && ~isnan(pressure(k))
         evt = 3;
         minpressure = pressure(k);
     else

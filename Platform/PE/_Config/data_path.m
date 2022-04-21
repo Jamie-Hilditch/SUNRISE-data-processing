@@ -39,7 +39,7 @@ if exist('Process_Mode','var')
             %%% CTD Path
             CTD_RAWR_Path = [datapath Process_Mode '/RAW_RSK_File/']; % raw rsk file
             CTD_RAWM_Path = [datapath Process_Mode '/RAW_mat_File/']; % raw mat file
-            CTD_PROC_Path = [datapath Process_Mode '/RAW_mat_File/']; % saving single profile
+            CTD_PROC_Path = [datapath Process_Mode '/Proc_mat_File/']; % saving single profile
             CTD_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
             
             ship = matfile([Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
@@ -75,6 +75,12 @@ if exist('Process_Mode','var')
             %%% loading toolbox
             addpath(genpath('../../../toolbox/instrument/rbr-rsktools'))
             addpath(genpath('../../../toolbox/general/gsw'))
+
+        case 'HydroCombo'
+            Hydro_DATA_Path = [Processed_Path Process_Mode '/'];
+            
+            vmp_combo = load([Processed_Path  'VMP/' Prefix '_VMP_Processed.mat']);
+            ctd_combo = load([Processed_Path  'CTD/' Prefix '_CTD_Processed.mat']);
             
         case 'PostProcessing'
             %% vmp processing

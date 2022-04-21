@@ -24,7 +24,7 @@ logid = fopen('./ctd_process_log.txt','a');
 Raw_list = dir([CTD_RAWR_Path '*.rsk']);
 %Raw_list = Raw_list(~endsWith({Raw_list.name}, '_original.P'));
 
-proc_idx = 1:2;%length(Raw_list);
+proc_idx = 1:length(Raw_list);
 
 for i = proc_idx
     if exist([CTD_RAWM_Path Raw_list(i).name(1:end-4) '.mat'],'file')

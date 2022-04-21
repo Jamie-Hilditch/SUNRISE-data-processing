@@ -56,13 +56,21 @@ for i = proc_idx
     if exist([VMP_RAWM_Path Raw_list(i).name(1:end-2) '.mat'],'file')
         raw_mat = load([VMP_RAWM_Path Raw_list(i).name(1:end-2) '.mat']);
     else
-        raw_mat = odas_p2mat([VMP_RAWP_Path Raw_list(i).name]);
-        save([VMP_RAWM_Path Raw_list(i).name(1:end-2) '.mat'],'-struct','raw_mat','-v7.3')
-        fprintf(logid,'%19s %8s Converting P-file.... \n',datestr(now,'yyyy mm/dd HH:MM:SS'),Raw_list(i).name);
+        try
+            raw_mat = odas_p2mat([VMP_RAWP_Path Raw_list(i).name]);
+            save([VMP_RAWM_Path Raw_list(i).name(1:end-2) '.mat'],'-struct','raw_mat','-v7.3')
+            fprintf(logid,'%19s %8s Converting P-file.... \n',datestr(now,'yyyy mm/dd HH:MM:SS'),Raw_list(i).name);
+        catch
+            movefile([VMP_RAWP_Path Raw_list(i).name],[VMP_RAWP_Path '/junk/' Raw_list(i).name])
+        end
     end
     
     %% seperate profile
-    profile_idx = get_profile(raw_mat.P_slow, raw_mat.W_slow, 0.5, 0.3, 'down', 10, raw_mat.fs_slow);
+    try 
+        profile_idx = get_profile(raw_mat.P_slow, raw_mat.W_slow, 0.5, 0.3, 'down', 10, raw_mat.fs_slow);
+    catch 
+        profile_idx = [];
+    end
     if isempty(profile_idx)
         movefile([VMP_RAWP_Path Raw_list(i).name],[VMP_RAWP_Path '/junk/' Raw_list(i).name])
         fprintf(logid,'%19s %8s No Profile - moving to junk \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name);
@@ -112,32 +120,34 @@ for i = proc_idx
                 %%% reprocess
                 warning('Reprocess FP07 Calibration')
                 raw_mat = odas_p2mat([VMP_RAWP_Path Raw_list(i).name]);
-                if mean(raw_mat.T1_fast)<0
-                    warning('T1 is broken and replaced with T2 (pause) ')
-                    pause
-                    raw_mat.T1 = raw_mat.T2;
-                    raw_mat.T1_dT2 = raw_mat.T1_dT2;
-                    raw_mat.T1_fast = raw_mat.T2_fast;
-                    raw_mat.T1_slow = raw_mat.T2_slow;
-                elseif mean(raw_mat.T2_fast)<0
-                    warning('T2 is broken and replaced with T1 (pause)')
-                    pause
-                    raw_mat.T2 = raw_mat.T1;
-                    raw_mat.T2_dT2 = raw_mat.T1_dT1;
-                    raw_mat.T2_fast = raw_mat.T1_fast;
-                    raw_mat.T2_slow = raw_mat.T1_slow;
-                elseif mean(raw_mat.T1_fast)<0 && mean(raw_mat.T2_fast)<0
-                    error('Two FP07 sensors are broken!!!')
-                end
                 
                 save([VMP_RAWM_Path Raw_list(i).name(1:end-2) '.mat'],'-struct','raw_mat','-v7.3')
                 logid = fopen('./vmp_process_log.txt','a');
                 fprintf(logid,'%19s %8s Converting P-file.... \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name);
                 
-                cali = 1;
+                cali = 0;
             else
                 cali = 0;
             end
+        end
+        
+        % find broken FP07 sensor
+        if mean(raw_mat.T1_fast)<0
+            warning('T1 is broken and replaced with T2 (pause) ')
+            pause
+            raw_mat.T1 = raw_mat.T2;
+            raw_mat.T1_dT2 = raw_mat.T1_dT2;
+            raw_mat.T1_fast = raw_mat.T2_fast;
+            raw_mat.T1_slow = raw_mat.T2_slow;
+        elseif mean(raw_mat.T2_fast)<0
+            warning('T2 is broken and replaced with T1 (pause)')
+            pause
+            raw_mat.T2 = raw_mat.T1;
+            raw_mat.T2_dT2 = raw_mat.T1_dT1;
+            raw_mat.T2_fast = raw_mat.T1_fast;
+            raw_mat.T2_slow = raw_mat.T1_slow;
+        elseif mean(raw_mat.T1_fast)<0 && mean(raw_mat.T2_fast)<0
+            error('Two FP07 sensors are broken!!!')
         end
         
         %% Jac salinity lag cali. & Density
@@ -187,7 +197,7 @@ for i = proc_idx
                 [Ay_des, spikes_Ay, pass_count_Ay, raction_Ay] = despike(raw_mat.Ay(pr_idx_fast), despike_A.thres, despike_A.smooth , raw_mat.fs_fast, round(despike_A.N_FS*raw_mat.fs_fast));
                 
                 if raction_Ax*100 >2|| raction_Ay*100>2
-                    warning('Spike ratio: Ax: %5.1f %% Ay:%5.1f %% (Dat:%03i;cast:%03i)\n',raction_Ax*100,raction_Ay*100,Raw_list(i).name,j)
+                    warning('Spike ratio: Ax: %5.1f %% Ay:%5.1f %% (Dat:%10s;cast:%03i)\n',raction_Ax*100,raction_Ay*100,Raw_list(i).name(1:end-2),j)
                     fprintf(logid,'%19s %8s Cast:%03i Piezo Spiking Ax: %5.1f %% Ay:%5.1f %% \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name,j,raction_Ax*100,raction_Ay*100);
                 end
                 
@@ -198,7 +208,7 @@ for i = proc_idx
                 [SH2_des, spikes_sh2, pass_count_sh2, raction_sh2] = despike(raw_mat.sh2(pr_idx_fast), despike_sh.thres, despike_sh.smooth , raw_mat.fs_fast, round(despike_sh.N_FS*raw_mat.fs_fast));
                 
                 if raction_sh2*100 >3 || raction_sh1*100>3
-                    warning('Spike ratio: SH1: %5.1f %% SH2:%5.1f %% (Dat:%03i;cast:%03i)\n',raction_sh1*100,raction_sh2*100,Raw_list(i).name,j)
+                    warning('Spike ratio: SH1: %5.1f %% SH2:%5.1f %% (Dat:%10s;cast:%03i)\n',raction_sh1*100,raction_sh2*100,Raw_list(i).name(1:end-2),j)
                     fprintf(logid,'%19s %8s Cast:%03i Piezo Spiking Ax: %5.1f %% Ay:%5.1f %% \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name,j,raction_sh1*100,raction_sh2*100);
                 end
                 %% high_pass signal for dissipation
@@ -235,7 +245,7 @@ for i = proc_idx
                 %% diss check
                 temp = length(find(abs(log10(diss.e(1,:)./diss.e(2,:)))>log10(5)))/length(diss.e(1,:));
                 if temp>0.15
-                    warning('Bad dissipation data %5.1f %% (Dat:%03i;cast:%03i)',temp*100,i,j)
+                    warning('Bad dissipation data %5.1f %% (Dat:%10s;cast:%03i)',temp*100,Raw_list(i).name(1:end-2),j)
                     fprintf(logid,'%19s %8s Cast:%03i disp ratio>5: %5.1f %% \n',datestr(now,'yyyy/mm/dd HH:MM:SS'),Raw_list(i).name,j,temp*100);
                 end
                 
@@ -451,7 +461,7 @@ for i = proc_idx
         
         
         
-        if exist([VMP_PROC_final_Path Prefix 'VMP_Precess.mat'],'file')
+        if exist([VMP_PROC_final_Path Prefix 'VMP_Process.mat'],'file')
             vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
             
             N_str = length(vmp_combo.dn)+1;
@@ -479,7 +489,7 @@ for i = proc_idx
         else
             vmp_combo = vmp_combo_temp;
         end
-        save([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat'],'-struct','vmp_combo','-v7.3')
+        save([VMP_PROC_final_Path Prefix '_VMP_Processed.mat'],'-struct','vmp_combo','-v7.3')
         movefile([VMP_RAWP_Path Raw_list(i).name],[VMP_RAWP_Path '/done/' Raw_list(i).name])
         clear vmp_profile vmp_combo_temp vmp_combo
     end
@@ -488,7 +498,7 @@ fclose(logid);
 
 %% sort and remove duplicated profile
 
-vmp_combo = load([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat']);
+vmp_combo = load([VMP_PROC_final_Path Prefix '_VMP_Processed.mat']);
 
 [~,idx_temp] = sort(vmp_combo.dn);
 
@@ -516,4 +526,4 @@ if isfield(vmp_combo,'tau')
     vmp_combo.ToB = vmp_combo.ToB(idx_temp);
 end
 
-save([VMP_PROC_final_Path Prefix '_VMP_Precessed.mat'],'-struct','vmp_combo','-v7.3')
+save([VMP_PROC_final_Path Prefix '_VMP_Processed.mat'],'-struct','vmp_combo','-v7.3')
