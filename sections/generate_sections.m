@@ -20,7 +20,7 @@ warning('off','MATLAB:table:RowsAddedExistingVars');
 % warning('off','MATLAB:MatFile:OlderFormat');
 
 % Location of intermediate processed data
-proc_dir = fullfile(master_config.data_directory,'processed');
+proc_dir = fullfile(master_config.data_directory,'Processed');
 
 % Location to save section files
 dir_out = fullfile(master_config.data_directory,'Sections');
@@ -64,7 +64,7 @@ fprintf("Setup Pelican Instruments\n")
 % define the Walton Smith data sources
 WS_wh300_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh300_Processed.mat');
 WS_wh600_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh600_Processed.mat');
-WS_wh600_nobeam2_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh600_nobeam4_Processed.mat');
+WS_wh600_nobeam2_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh600_no_beam2_Processed.mat');
 WS_wh1200_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh1200_Processed.mat');
 WS_Hydro_file = fullfile(proc_dir,'HydroCombo','SUNRISE2021_WS_HydroCombo_Processed.mat');
 %WS_TChain_directory = fullfile(proc_dir,'tchain','Walton_Smith');

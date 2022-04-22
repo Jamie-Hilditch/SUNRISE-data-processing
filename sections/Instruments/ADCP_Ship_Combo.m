@@ -31,24 +31,11 @@ classdef ADCP_Ship_Combo < Instrument
             arguments
                 name string = ""
                 data_file = string.empty
-                adcp_name string = ""
                 variables string = string.empty
             end
 
-            % check file and adcp_name are valid
-            varlist = who(matfile(data_file));
-            if ~isempty(varlist) && ~any(strcmp(varlist,adcp_name))
-                cell_adcps = join(varlist,', ');
-                error('MATLAB:mycode:variableNotFound', ...
-                    ['Could not find %1s in file %2s.\n', ...
-                    'Available ADCPs are %s\n'], ...
-                    adcp_name,data_file,cell_adcps{:})
-            end
-
             obj = obj@Instrument(name,variables);
-
             obj.data_source = data_file;
-            obj.adcp_name = adcp_name;
         end
 
         function data = get_data(obj,start,stop)
@@ -98,21 +85,22 @@ classdef ADCP_Ship_Combo < Instrument
 
             % Construct the time index for the section
             dn = adcp_data.dn;
-            idx = dn >= datenum(start) & dn <= datenum(stop);
+            nidx = find(dn >= datenum(start) & dn <= datenum(stop));
 
             % Return if no datapoints
-            if sum(idx) == 0; data = struct([]); return; end
+            if isempty(nidx); data = struct([]); return; end
 
             % loop through variables saving each to the output structure
             for var = variables
 
                 if var == "dn"
-                  data.dn = adcp_data.dn(idx,:);
+                  data.dn = adcp_data.dn(nidx,:);
+		  continue
                 end
 
                 % All other ship ADCP variables are two dimensional with the
                 % dimension as the second dimension
-                data.(var) = adcp_data.(var)(:,idx);
+                data.(var) = adcp_data.(char(var))(:,nidx);
 
             end
             % print a message

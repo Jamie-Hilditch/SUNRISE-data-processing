@@ -85,6 +85,7 @@ classdef Hydro_Combo < Instrument
             % Construct the time index for the section
             dn = hydro_data.dn;
             idx = dn >= datenum(start) & dn <= datenum(stop);
+	    nidx = find(idx);
 
             % Return if no datapoints
             if sum(idx) == 0; data = struct([]); return; end
@@ -96,16 +97,16 @@ classdef Hydro_Combo < Instrument
 
                 % u_star_cint is time then depth
                 case "u_star_cint"
-                  data.(var) = hydro_data.(var)(idx,:);
+                  data.(var) = hydro_data.u_star_cint(nidx,:);
 
                 % depth has no time dimension
                 case "depth"
-                  data.(var) = hydro_data.(var);
+                  data.(var) = hydro_data.depth;
 
                 % All other hydro combo variables are two dimensional with the
                 % dimension as the second dimension
                 otherwise
-                  data.(var) = hydro_data.(var)(:,idx);
+                  data.(var) = hydro_data.(char(var))(:,nidx);
                 end
 
             end
