@@ -51,7 +51,7 @@ classdef FTMET_mat < Instrument
       end
 
       % Construct the time index for the section
-      dn = ftmet.time;
+      dn = ftmet.dn;
       nidx = find(dn >= datenum(start) & dn <= datenum(stop));
 
       % loop through variables saving each to the output structure

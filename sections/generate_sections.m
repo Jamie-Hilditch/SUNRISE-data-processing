@@ -20,10 +20,10 @@ warning('off','MATLAB:table:RowsAddedExistingVars');
 % warning('off','MATLAB:MatFile:OlderFormat');
 
 % Location of intermediate processed data
-proc_dir = fullfile(master_config.data_directory,'processed');
+proc_dir = fullfile(master_config.data_directory,'Processed');
 
 % Location to save section files
-dir_out = fullfile(master_config.data_directory,'sections');
+dir_out = fullfile(master_config.data_directory,'Sections');
 
 % Get survey metadata
 surveys = dir(fullfile(proc_dir,'survey_metadata','survey_*_sections.csv'));
@@ -40,17 +40,20 @@ fprintf("Setting up vessels and instruments\n")
 
 % setup the Pelican instruments
 % define Pelican data sources
-PE_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_PE_ADCP.mat');
-PE_Hydro_file = fullfile(proc_dir,'combined_hydro','SUNRISE2021_PE_hydro_combo.mat');
-PE_TChain_directory = fullfile(proc_dir,'tchain','Pelican');
-PE_FTMET_file = fullfile(proc_dir,'ship_das','SUNRISE2021_PE_shipdata.mat');
+PE_wh300_file = fullfile(proc_dir,'ADCP','SUNRISE2021_PE_wh300_Processed.mat');
+PE_wh600_file = fullfile(proc_dir,'ADCP','SUNRISE2021_PE_wh600_Processed.mat');
+PE_wh600_nobeam4_file = fullfile(proc_dir,'ADCP','SUNRISE2021_PE_wh600_nobeam4_Processed.mat');
+PE_wh1200_file = fullfile(proc_dir,'ADCP','SUNRISE2021_PE_wh1200_Processed.mat');
+PE_Hydro_file = fullfile(proc_dir,'HydroCombo','SUNRISE2021_PE_HydroCombo_Processed.mat');
+PE_TChain_directory = fullfile(proc_dir,'Tchain','PE');
+PE_FTMET_file = fullfile(proc_dir,'ShipDas','SUNRISE2021_PE_ShipDas_Processed.mat');
 
 % create the Pelican Vessel class and instruments
 % store the vessels in a structure
-vessels.Pelican = Vessel(ADCP_Ship_Combo('ADCP_PE_wh1200',PE_ADCP_file,'wh1200'), ...
-                         ADCP_Ship_Combo('ADCP_PE_wh600',PE_ADCP_file,'wh600'), ...
-                         ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_ADCP_file,'wh600_no4'), ...
-                         ADCP_Ship_Combo('ADCP_PE_wh300',PE_ADCP_file,'wh300'), ...
+vessels.Pelican = Vessel(ADCP_Ship_Combo('ADCP_PE_wh1200',PE_wh1200_file), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh600',PE_wh600_file), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh600_no4',PE_wh600_nobeam4_file), ...
+                         ADCP_Ship_Combo('ADCP_PE_wh300',PE_wh300_file), ...
                          Hydro_Combo('HYDRO_Pelican',PE_Hydro_file), ...
                          Tchain('TCHAIN_Pelican',PE_TChain_directory), ...
                          FTMET_mat('FTMET_Pelican',PE_FTMET_file));
@@ -59,34 +62,38 @@ fprintf("Setup Pelican Instruments\n")
 
 % setup the Walton Smith Instruments
 % define the Walton Smith data sources
-WS_ADCP_file = fullfile(proc_dir,'adcp_ship','SUNRISE2021_WS_adcp.mat');
-WS_VMP_file = fullfile(proc_dir,'VMP','SUNRISE2021_WS_combo.mat');
-WS_TChain_directory = fullfile(proc_dir,'tchain','Walton_Smith');
+WS_wh300_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh300_Processed.mat');
+WS_wh600_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh600_Processed.mat');
+WS_wh600_nobeam2_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh600_no_beam2_Processed.mat');
+WS_wh1200_file = fullfile(proc_dir,'ADCP','SUNRISE2021_WS_wh1200_Processed.mat');
+WS_Hydro_file = fullfile(proc_dir,'HydroCombo','SUNRISE2021_WS_HydroCombo_Processed.mat');
+%WS_TChain_directory = fullfile(proc_dir,'tchain','Walton_Smith');
+WS_FTMET_file = fullfile(proc_dir,'ShipDas','SUNRISE2021_WS_ShipDas_Processed.mat');
 
 % create WS Vessel Class and intruments
-vessels.Walton_Smith = Vessel(ADCP_Ship_Combo('ADCP_WS_wh1200',WS_ADCP_file,'wh1200'), ...
-                              ADCP_Ship_Combo('ADCP_WS_wh600',WS_ADCP_file,'wh600'), ...
-                              ADCP_Ship_Combo('ADCP_WS_wh600_no2',WS_ADCP_file,'wh600_no_beam2'), ...
-                              VMP_Combo('VMP_Walton_Smith',WS_VMP_file), ...
-                              Tchain('TCHAIN_Walton_Smith',WS_TChain_directory));
+vessels.Walton_Smith = Vessel(ADCP_Ship_Combo('ADCP_WS_wh1200',WS_wh1200_file), ...
+                              ADCP_Ship_Combo('ADCP_WS_wh600',WS_wh600_file), ...
+                              ADCP_Ship_Combo('ADCP_WS_wh600_no2',WS_wh600_nobeam2_file), ...
+                              Hydro_Combo('HYDRO_Walton_Smith',WS_Hydro_file), ...
+                              FTMET_mat('FTMET_Walton_Smith',WS_FTMET_file));
 
 fprintf("Setup Walton Smith Instruments\n")
 
 % setup Polly Instruments
-Polly_TChain_directory = fullfile(proc_dir,'tchain','Polly');
+%Polly_TChain_directory = fullfile(proc_dir,'tchain','Polly');
 
 % create Polly Vessel Class and intruments
-vessels.Polly = Vessel(Tchain('TCHAIN_Polly',Polly_TChain_directory));
+%vessels.Polly = Vessel(Tchain('TCHAIN_Polly',Polly_TChain_directory));
 
-fprintf("Setup Polly Instruments\n")
+%fprintf("Setup Polly Instruments\n")
 
 % setup Aries Instruments
-Aries_TChain_directory = fullfile(proc_dir,'tchain','Aries');
+%Aries_TChain_directory = fullfile(proc_dir,'tchain','Aries');
 
 % create Aries Vessel Class and intruments
-vessels.Aries = Vessel(Tchain('TCHAIN_Aries',Aries_TChain_directory));
+%vessels.Aries = Vessel(Tchain('TCHAIN_Aries',Aries_TChain_directory));
 
-fprintf("Setup Aries Instruments\n")
+%fprintf("Setup Aries Instruments\n")
 
 % create a string array of vessel names
 % note that this code assumes that these names are used in the sections metadata table
