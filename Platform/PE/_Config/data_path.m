@@ -65,7 +65,7 @@ if exist('Process_Mode','var')
             
         case 'Tchain'
             TCn_DATA_Path = [datapath Process_Mode '/'];
-            TCn_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
+            TCn_PROC_final_Path = [Processed_Path Process_Mode '/' Platform '/']; % combine
             
             TCn_GPS_Path = [Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']; %%% ship time/location
             

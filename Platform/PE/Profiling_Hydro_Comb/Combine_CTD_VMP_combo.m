@@ -16,7 +16,6 @@ data_path %% all data path and library
 
 [~,idx] = sort([vmp_combo.dn ctd_combo.dn]);
 
-
 %% theta
 temp = [vmp_combo.theta ctd_combo.theta];
 hydro_combo.theta = temp(:,idx);
