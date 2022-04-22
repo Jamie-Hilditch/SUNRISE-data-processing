@@ -11,12 +11,7 @@ addpath('../_Config')
 Process_Mode = 'CTD';
 data_path %% all data path and library
 
-%% version check
-% if odas_version_info ~= 4.4
-%     error('ERROR: please use odas v4.4')
-% end
-
-%% vmp log
+%% CTD log
 logid = fopen('./ctd_process_log.txt','a');
 
 

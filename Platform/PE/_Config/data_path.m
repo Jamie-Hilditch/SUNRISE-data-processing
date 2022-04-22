@@ -66,16 +66,16 @@ if exist('Process_Mode','var')
         case 'Tchain'
             TCn_DATA_Path = [datapath Process_Mode '/'];
             TCn_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
-            try 
-                TCn_GPS_Path = matfile([Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
-            catch
-                TCn_GPS_Path = [];
-            end
+            
+            TCn_GPS_Path = [Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']; %%% ship time/location
             
             %%% loading toolbox
             addpath(genpath('../../../toolbox/instrument/rbr-rsktools'))
             addpath(genpath('../../../toolbox/general/gsw'))
 
+            %%% loading Tchain Config and hook
+            addpath(genpath('./tchain_toolbox'))
+            
         case 'HydroCombo'
             Hydro_DATA_Path = [Processed_Path Process_Mode '/'];
             

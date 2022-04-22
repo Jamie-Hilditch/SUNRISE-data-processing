@@ -461,8 +461,8 @@ for i = proc_idx
         
         
         
-        if exist([VMP_PROC_final_Path Prefix 'VMP_Process.mat'],'file')
-            vmp_combo = load([VMP_PROC_final_Path Prefix 'VMP_Precess.mat']);
+        if exist([VMP_PROC_final_Path Prefix '_VMP_Processed.mat'],'file')
+            vmp_combo = load([VMP_PROC_final_Path Prefix '_VMP_Processed.mat']);
             
             N_str = length(vmp_combo.dn)+1;
             
