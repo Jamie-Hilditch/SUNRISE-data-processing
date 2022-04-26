@@ -57,25 +57,35 @@ classdef Hydro_Combo < Instrument
                 stop datetime
             end
 
-            %%%%%%%%%%
-            % FIX ME %
-            %%%%%%%%%%
-            % Save combo file with -struct and then load variables
-            % individually
             % load in data
-            hydro_data = load(obj.data_source).hydro_combo;
+            hydro_data = matfile(obj.data_source);;
 
             % obj.variables defines which variables are to be included
             % if obj.variables is empty (default) we include all the variables
+            % get variables
             if isempty(obj.variables)
-               variables = string(fieldnames(hydro_data))';
+                variables = string(who(hydro_data))';
             else
-               variables = obj.variables;
+                variables = obj.variables;
+
+                % check all these variables exist
+                compare_vars = any(variables == string(who(hydro_data)));
+
+                % throw a warning for variables that don't exist
+                unrecognized_vars = variables(~compare_vars);
+                for var = unrecognized_vars
+                    warning('Variable %s not found in %s - file %s', ...
+                        var,obj.name,hydro_data.Properties.Source);
+                end
+
+                % continue with variables that do exist
+                variables = variables(compare_vars);
             end
 
             % Construct the time index for the section
             dn = hydro_data.dn;
             idx = dn >= datenum(start) & dn <= datenum(stop);
+	    nidx = find(idx);
 
             % Return if no datapoints
             if sum(idx) == 0; data = struct([]); return; end
@@ -83,15 +93,21 @@ classdef Hydro_Combo < Instrument
             % loop through variables saving each to the output structure
             for var = variables
 
-                % Throw a warning if the variable does not exist but continue
-                if ~isfield(hydro_data,var)
-                    warning('Variable %s not found in %s',var,obj.name);
-                    continue
-                end
+                switch var
 
-                % All hydro combo variables are two dimensional with the
+                % u_star_cint is time then depth
+                case "u_star_cint"
+                  data.(var) = hydro_data.u_star_cint(:,nidx);
+
+                % depth has no time dimension
+                case "depth"
+                  data.(var) = hydro_data.depth;
+
+                % All other hydro combo variables are two dimensional with the
                 % dimension as the second dimension
-                data.(var) = hydro_data.(var)(:,idx);
+                otherwise
+                  data.(var) = hydro_data.(char(var))(:,nidx);
+                end
 
             end
             % print a message

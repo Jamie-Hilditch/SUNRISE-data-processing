@@ -178,8 +178,8 @@ for i = proc_idx
         % For more than 2 SH/T sensor OR C-sensor OR diff vehicle please refer
         % quick_look to alter the code
         
-        [slow_matrix,fast_matrix] = deal(nan(max(diff(profile_idx)),size(profile_idx,2)));
-        
+        slow_matrix = nan(max(diff(profile_idx)),size(profile_idx,2));
+        fast_matrix = nan(round(max(diff(profile_idx))*raw_mat.fs_fast/raw_mat.fs_slow)+10,size(profile_idx,2));
         for j = 1:size(profile_idx,2)
             pr_str = profile_idx(1,j); %profile start point
             
@@ -304,6 +304,8 @@ for i = proc_idx
             else
                 load([VMP_PROC_Path Prefix '_' datestr(raw_mat.filetime+raw_mat.t_slow(pr_str)/86400,'yyyymmddHHMMSS') '.mat'])
             end
+            
+            
             %% write combined file
             %% VMP JAC&T1/T2
             vmp_names=[{'JAC_theta'};{'JAC_T'};{'JAC_C'};{'JAC_SP'};{'JAC_SA'};{'JAC_sigma'};{'JAC_rho'};...
@@ -343,8 +345,8 @@ for i = proc_idx
                     vmp_profile.(bio_names{k}) = fast_matrix;
                     vmp_profile.(bio_names{k})(1:N_fast,j) = bio.(bio_names{k});
                 else
-                    if N_fast>size(vmp_profile.(vmp_names{k}),1)
-                        vmp_profile.(vmp_names{k})(size(vmp_profile.(vmp_names{k}),1)+1:N_fast,:) = nan;
+                    if N_fast>size(vmp_profile.(bio_names{k}),1)
+                        vmp_profile.(bio_names{k})(size(vmp_profile.(bio_names{k}),1)+1:N_fast,:) = nan;
                     end
                     vmp_profile.(bio_names{k})(1:N_fast,j) = bio.(bio_names{k});
                     vmp_profile.(bio_names{k})(vmp_profile.(bio_names{k}) == 0) = nan;
@@ -394,7 +396,7 @@ for i = proc_idx
             
             if isstruct(BBL_info)
                 vmp_profile.u_star(j) = BBL.u_star;
-                vmp_profile.u_star_cint(j,:) = BBL.u_star_cint;
+                vmp_profile.u_star_cint(:,j) = BBL.u_star_cint;
                 vmp_profile.tau(j) = BBL.tau;
                 vmp_profile.ToB(j) = BBL.ToB;
             end
@@ -450,7 +452,7 @@ for i = proc_idx
         vmp_combo_temp.dist_vmp = vmp_profile.dist_vmp;
         vmp_combo_temp.data_num = vmp_profile.data_num;
         vmp_combo_temp.profile = vmp_profile.profile;
-        vmp_combo_temp.depth = (-0.5:-1:-level+0.5);
+        vmp_combo_temp.depth = (dz/2:dz:dz*level-dz/2);
         
         if isfield(vmp_profile,'tau')
             vmp_combo_temp.u_star = vmp_profile.u_star;
@@ -478,11 +480,11 @@ for i = proc_idx
             vmp_combo.dist_vmp(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.dist_vmp;
             vmp_combo.data_num(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.data_num;
             vmp_combo.profile(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.profile;
-            vmp_combo.depth = (-dz/2:-dz:-dz*level+dz/2);
+            vmp_combo.depth = (dz/2:dz:dz*level-dz/2);
             
             if isfield(vmp_profile,'tau')
                 vmp_combo.u_star(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.u_star;
-                vmp_combo.u_star_cint(N_str:N_str-1+length(vmp_combo_temp.dn),:) = vmp_combo_temp.u_star_cint;
+                vmp_combo.u_star_cint(:,N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.u_star_cint;
                 vmp_combo.tau(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.tau;
                 vmp_combo.ToB(N_str:N_str-1+length(vmp_combo_temp.dn)) = vmp_combo_temp.ToB;
             end
@@ -521,7 +523,7 @@ vmp_combo.profile = vmp_combo.profile(idx_temp);
 
 if isfield(vmp_combo,'tau')
     vmp_combo.u_star = vmp_combo.u_star(idx_temp);
-    vmp_combo.u_star_cint= vmp_combo.u_star_cint(idx_temp,:);
+    vmp_combo.u_star_cint= vmp_combo.u_star_cint(:,idx_temp);
     vmp_combo.tau = vmp_combo.tau(idx_temp);
     vmp_combo.ToB = vmp_combo.ToB(idx_temp);
 end

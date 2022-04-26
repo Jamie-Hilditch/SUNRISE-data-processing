@@ -50,7 +50,7 @@ for file_i = 1:length(Comb_mat_list)
     CTD_combo_temp.dist_ctd = ctd.dist_ctd;
     CTD_combo_temp.data_num = ctd.data_num;
     CTD_combo_temp.profile = ctd.profile;
-    CTD_combo_temp.depth = (-dz/2:-dz:-dz*level+dz/2);
+    CTD_combo_temp.depth = (dz/2:dz:dz*level-dz/2);
     
     if exist([CTD_PROC_final_Path Prefix '_CTD_Processed.mat'],'file')
         CTD_combo = load([CTD_PROC_final_Path Prefix '_CTD_Processed.mat']);
@@ -76,7 +76,7 @@ for file_i = 1:length(Comb_mat_list)
         CTD_combo.dist_ctd(N_str:N_str-1+length(CTD_combo_temp.dn)) = CTD_combo_temp.dist_ctd;
         CTD_combo.data_num(N_str:N_str-1+length(CTD_combo_temp.dn)) = CTD_combo_temp.data_num;
         CTD_combo.profile(N_str:N_str-1+length(CTD_combo_temp.dn)) = CTD_combo_temp.profile;
-        CTD_combo.depth = (-dz/2:-dz:-dz*level+dz/2);
+        CTD_combo.depth = (dz/2:dz:dz*level-dz/2);
         
     else
         CTD_combo = CTD_combo_temp;

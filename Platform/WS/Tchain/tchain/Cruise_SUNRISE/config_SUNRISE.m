@@ -125,54 +125,6 @@ for i = 1:length(config)
 
         end
 
-      case 'Aries'
-        config(i).file_gps = '/home/dw/Data/SUNRISE/RHIB/nav/gps_Aries.mat';
-        switch config(i).name
-          case 'deploy_20210622_2300'
-            config(i).zero_pressure_interval = datenum(['22-Jun-2021 21:34:55';
-                                                        '22-Jun-2021 23:34:19']);
-          case 'deploy_20210624'
-            config(i).zero_pressure_interval = datenum(['24-Jun-2021 21:09:36';
-                                                        '24-Jun-2021 22:26:48']);
-          case 'deploy_20210629'
-            config(i).zero_pressure_interval = datenum(['28-Jun-2021 02:41:26'
-                                                        '29-Jun-2021 17:12:32']);
-          case 'deploy_20210702'
-            config(i).zero_pressure_interval = datenum(['02-Jul-2021 00:57:36';
-                                                        '02-Jul-2021 14:45:16']);
-          case 'deploy_20210706'
-            config(i).zero_pressure_interval = datenum(['06-Jul-2021 21:24:42';
-                                                        '06-Jul-2021 22:45:38']);
-        end
-
-      case 'Polly'
-        config(i).file_gps = '/home/dw/Data/SUNRISE/RHIB/nav/gps_Polly.mat';
-        switch(config(i).name)
-          case 'deploy_20210623_2225'
-            config(i).zero_pressure_interval = datenum(['23-Jun-2021 09:48:56';
-                                                        '23-Jun-2021 20:39:15']);
-          case 'deploy_20210625'
-            config(i).zero_pressure_interval = datenum(['25-Jun-2021 22:23:25';
-                                                        '26-Jun-2021 01:08:38']);
-          case 'deploy_20210629'
-            config(i).zero_pressure_interval = datenum(['27-Jun-2021 21:52:15';
-                                                        '29-Jun-2021 06:30:58']);
-          case {'deploy_20210630','deploy_20210701'}
-            config(i).zero_pressure_interval = datenum(['30-Jun-2021 21:00:13';
-                                                        '30-Jun-2021 21:18:09']);
-          case {'deploy_20210704','deploy_20210706'};
-            config(i).zero_pressure_interval = datenum(['03-Jul-2021 02:43:08';
-                                                        '03-Jul-2021 22:26:32']);
-        end
-
-      case 'Pelican'
-        config(i).file_gps = '/home/dw/Data/SUNRISE/PE_nav_final.mat';
-
-      % Configure Pelican deployments
-      case 'Pelican'
-        switch config(i).name
-          case 'deploy_name'
-        end
     end
 end
 

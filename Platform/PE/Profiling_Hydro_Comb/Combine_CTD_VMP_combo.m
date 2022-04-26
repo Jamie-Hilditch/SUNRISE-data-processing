@@ -58,8 +58,8 @@ if isfield(vmp_combo,'tau')
     hydro_combo.u_star = temp(:,idx);
 
     %%  u_star_cint
-    temp = [vmp_combo.u_star_cint;nan(length(ctd_combo.lat),2)];
-    hydro_combo.u_star_cint = temp(idx,:);
+    temp = [vmp_combo.u_star_cint nan(2,length(ctd_combo.lat))];
+    hydro_combo.u_star_cint = temp(:,idx);
 
     %%  tau
     temp = [vmp_combo.tau nan(size(ctd_combo.lat))];

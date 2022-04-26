@@ -55,11 +55,10 @@ if exist('Process_Mode','var')
             DAS_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
             
         case 'ADCP_UHDAS'
-            ADCP_Project_name = 'PE21_24_merge';
-            ADCP_name = {'wh1200','wh600','wh600_nobeam4','wh300'};
+
             ADCP_PROC_Path = [datapath Process_Mode '/' ADCP_Project_name '/proc/'];
             
-            ADCP_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
+            ADCP_PROC_final_Path = [Processed_Path 'ADCP/']; % combine
             
             ship = matfile([Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
             
@@ -75,6 +74,16 @@ if exist('Process_Mode','var')
 
             %%% loading Tchain Config and hook
             addpath(genpath('./tchain_toolbox'))
+            
+        case 'Biosonics'
+            Bioson_RAWD_Path = [datapath Process_Mode '/Raw_DT4/'];
+            Bioson_RAWM_Path = [datapath Process_Mode '/Raw_mat/'];
+            Bioson_PROC_final_Path = [Processed_Path Process_Mode '/']; % combine
+            
+            ship = matfile([Processed_Path 'ShipDas/' Prefix '_ShipDas_Processed.mat']); %%% ship time/location
+            
+            %%% loading toolbox
+            addpath(genpath('../../../toolbox/instrument/OMG_biosonic'))
             
         case 'HydroCombo'
             Hydro_DATA_Path = [Processed_Path Process_Mode '/'];

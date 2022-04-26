@@ -30,21 +30,16 @@ Subdirectory containing the `Instrument` class and subclasses for individual imp
 - *ADCP_Ship_Combo* implementation (subclass) of `Instrument` for the shipboard ADCP combo files.   
   **Constructor Arguments**  
   - `name`: name of this ADCP in the section files e.g. *ADCP_PE_wh1200*
-  - `datafile`: path to the combo file e.g. *'.../processed/adcp_ship/SUNRISE2021_PE_ADCP.mat'*
-  - `adcp_name`: each combo file contains multiple ADCPs so we must specify which one e.g. *'wh1200'*
+  - `datafile`: path to the file
   - `variables`: `string array` of variables to include. Default: `string.empty` in which case all variables are included.
 
 - *Hydro_Combo* implementation of `Instrument` for the combined VMP and CTD files.  
   **Constructor Arguments**  
   - `name`: name in the section files e.g. *HYDRO_Pelican*
-  - `data_file`: path to the hydro combo file e.g. *'.../processed/combined_hydro/SUNRISE2021_PE_hydro_combo.mat'*
+  - `data_file`: path to the hydro combo file e.g. *'.../Processed/HydroCombo/SUNRISE2021_PE_HydroCombo_Processed.mat'*
   - `variables`: `string array` of variables to include. Default: `string.empty` in which case all variables are included.
 
-- *VMP_Combo* implementation of `Instrument` for the VMP combo files.  
-  **Constructor Arguments**  
-  - `name`: name in the section files e.g. *VMP_Walton_Smith*
-  - `data_file`: path to the VMP combo file e.g. *'.../processed/VMP/SUNRISE2021_WS_combo.mat'*
-  - `variables`: `string array` of variables to include. Default: `string.empty` in which case all variables are included.
+
 
 - *TChain* implementation of `Instrument` for the TChains.  
   **Constructor Arguments**
@@ -54,3 +49,6 @@ Subdirectory containing the `Instrument` class and subclasses for individual imp
 
 - *ADCP_Rhib* redundant implementation of `Instrument` for the rhib adcps.  
   This class used the intermediate files rather than the processed files and will need reimplementing once those files are uploaded to the google drive.
+
+ - *VMP_Combo* redundant implementation of `Instrument` for the VMP combo files.  
+  VMP data is merged with CTD into Hydro files
