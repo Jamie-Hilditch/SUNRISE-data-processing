@@ -95,6 +95,7 @@ classdef ADCP_Ship_Combo < Instrument
 
                 if var == "dn"
                   data.dn = adcp_data.dn(nidx,:);
+
 		  continue
                 end
 
