@@ -94,7 +94,8 @@ classdef ADCP_Ship_Combo < Instrument
             for var = variables
 
                 if var == "dn"
-                  data.dn = adcp_data.dn(:,nidx);
+                  data.dn = adcp_data.dn(nidx,:);
+
 		  continue
                 end
 

@@ -97,7 +97,7 @@ classdef Hydro_Combo < Instrument
 
                 % u_star_cint is time then depth
                 case "u_star_cint"
-                  data.(var) = hydro_data.u_star_cint(:,nidx);
+                  data.(var) = hydro_data.u_star_cint(nidx,:);
 
                 % depth has no time dimension
                 case "depth"
